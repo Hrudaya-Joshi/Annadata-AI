@@ -4,20 +4,20 @@
 {% block head_extra %}
 <style>
 #rescueMap {
-    height: 620px;
+    height: 640px;
     width: 100%;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-warm);
     box-shadow: var(--shadow-sm);
     z-index: 1;
 }
 
 .map-control-panel {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 249, 240, 0.96);
     backdrop-filter: blur(8px);
-    border: 1px solid var(--border-color);
+    border: 1.5px solid var(--border-warm);
     border-radius: var(--radius-md);
-    padding: 1rem;
+    padding: 1.15rem;
     box-shadow: var(--shadow-md);
 }
 
@@ -28,61 +28,83 @@
     border-radius: 50%;
     color: white;
     font-weight: bold;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    border: 2px solid white;
+    box-shadow: 0 4px 10px rgba(36, 76, 56, 0.3);
+    border: 2.5px solid #FFFFFF;
+    transition: transform 0.2s ease;
+}
+
+.custom-marker:hover {
+    transform: scale(1.15);
+}
+
+.custom-marker.emergency {
+    animation: markerPulse 1.5s infinite;
+    border-color: #F2B544;
+}
+
+@keyframes markerPulse {
+    0% { box-shadow: 0 0 0 0 rgba(232, 121, 70, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(232, 121, 70, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(232, 121, 70, 0); }
 }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid px-lg-5 py-4">
-    <!-- Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
+    <!-- Header Banner -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3 p-4 rounded-4" style="background: var(--surface-white); border: 1.5px solid var(--border-warm); box-shadow: var(--shadow-sm);">
         <div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge badge-soft badge-soft-success">Live Spatial Intelligence</span>
-                <span class="text-muted small">&bull; OpenStreetMap Cartography</span>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge badge-soft badge-fresh">
+                    <i data-lucide="map-pin" style="width: 12px; height: 12px;"></i> Geospatial Food Rescue Network
+                </span>
+                <span class="text-muted small">&bull; Real-Time Hyperlocal Cartography</span>
             </div>
-            <h2 class="fw-bold mb-0">Food Rescue Geospatial Network</h2>
-            <div class="text-muted small">Real-time visualization of surplus kitchens, certified shelters, and active courier transit paths</div>
+            <h2 class="fw-bold text-forest mb-0">Food Rescue Spatial Radar</h2>
+            <div class="text-muted small">
+                Live location tracking of commercial kitchens with surplus, verified relief shelters, and active courier transit routes
+            </div>
         </div>
 
-        <!-- Filter Buttons -->
+        <!-- Layer Filters -->
         <div class="btn-group btn-group-sm" id="mapFilters">
             <button type="button" class="btn btn-forest active" data-filter="all">All Layers</button>
-            <button type="button" class="btn btn-outline-forest" data-filter="donations">Active Surplus</button>
-            <button type="button" class="btn btn-outline-forest" data-filter="ngos">Certified NGOs</button>
-            <button type="button" class="btn btn-outline-forest" data-filter="volunteers">Volunteer Couriers</button>
+            <button type="button" class="btn btn-outline-forest" data-filter="donations">Surplus Kitchens</button>
+            <button type="button" class="btn btn-outline-forest" data-filter="ngos">Relief NGOs</button>
+            <button type="button" class="btn btn-outline-forest" data-filter="volunteers">Active Couriers</button>
             <button type="button" class="btn btn-outline-forest" data-filter="transit">Transit Routes</button>
         </div>
     </div>
 
-    <!-- Map Container with floating legend -->
+    <!-- Map Container with Floating Legend -->
     <div class="position-relative mb-4">
         <div id="rescueMap"></div>
 
-        <!-- Floating Legend -->
-        <div class="position-absolute bottom-0 start-0 m-3 map-control-panel small d-none d-md-block" style="z-index: 1000; max-width: 260px;">
-            <div class="fw-bold text-dark mb-2">Map Legend</div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span style="width: 12px; height: 12px; border-radius: 50%; background: #123D32; display: inline-block;"></span>
-                <span>Active Food Surplus Batch</span>
+        <!-- Floating Legend with Food Rescue Palette -->
+        <div class="position-absolute bottom-0 start-0 m-3 map-control-panel small d-none d-md-block" style="z-index: 1000; max-width: 280px;">
+            <div class="fw-bold text-forest mb-2 d-flex align-items-center gap-1">
+                <i data-lucide="layers" style="width: 14px; height: 14px;"></i> Rescue Network Legend
             </div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span style="width: 12px; height: 12px; border-radius: 50%; background: #EF4444; display: inline-block;"></span>
-                <span>Emergency Surplus (&lt;2h left)</span>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span style="width: 14px; height: 14px; border-radius: 50%; background: var(--forest-green); display: inline-block; border: 2px solid #FFFFFF;"></span>
+                <span class="text-forest fw-semibold">Kitchen Surplus Batch</span>
             </div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span style="width: 12px; height: 12px; border-radius: 50%; background: #18A875; display: inline-block;"></span>
-                <span>Certified NGO Shelter</span>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span style="width: 14px; height: 14px; border-radius: 50%; background: var(--terracotta); display: inline-block; border: 2px solid #FFFFFF;"></span>
+                <span class="text-terracotta fw-bold">Emergency Rescue (&lt;2h)</span>
             </div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span style="width: 12px; height: 12px; border-radius: 50%; background: #3B82F6; display: inline-block;"></span>
-                <span>Available Rescue Courier</span>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span style="width: 14px; height: 14px; border-radius: 50%; background: var(--leaf-green); display: inline-block; border: 2px solid #FFFFFF;"></span>
+                <span class="text-forest">Certified Relief Shelter</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span style="width: 14px; height: 14px; border-radius: 50%; background: var(--harvest-yellow); display: inline-block; border: 2px solid #FFFFFF;"></span>
+                <span class="text-forest">Courier Volunteer</span>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <span style="width: 20px; height: 2px; background: #D97706; display: inline-block; border-top: 2px dashed #D97706;"></span>
-                <span>Active Transit Route</span>
+                <span style="width: 22px; height: 3px; background: var(--terracotta); display: inline-block; border-top: 2px dashed var(--terracotta);"></span>
+                <span class="text-forest">Live Transit Path</span>
             </div>
         </div>
     </div>
@@ -92,7 +114,7 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-    // Default coordinates: Bengaluru Center [12.9716, 77.5946]
+    // Default coordinates: Bengaluru Metro Center [12.9716, 77.5946]
     const map = L.map('rescueMap').setView([12.9716, 77.5946], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -109,22 +131,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         const resp = await fetch('/api/map/data');
         const data = await resp.json();
 
-        // 1. Add Food Donations
+        // 1. Add Food Surplus Donations
         (data.donations || []).forEach(d => {
             const isEmergency = d.is_emergency;
-            const markerColor = isEmergency ? '#EF4444' : '#123D32';
-            const iconHtml = `<div class="custom-marker" style="background: ${markerColor}; width: 28px; height: 28px; font-size: 14px;">🍲</div>`;
-            const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [28, 28] });
+            const markerColor = isEmergency ? '#E87946' : '#244C38';
+            const pulseClass = isEmergency ? 'emergency' : '';
+            const iconHtml = `<div class="custom-marker ${pulseClass}" style="background: ${markerColor}; width: 32px; height: 32px; font-size: 15px;">🍲</div>`;
+            const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [32, 32] });
 
             const popupContent = `
-                <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem;">
-                    <div style="font-weight: 700; color: #123D32; font-size: 0.95rem;">${d.name}</div>
-                    <div style="color: #64748B; font-size: 0.75rem; margin-bottom: 4px;">${d.quantity} &bull; ${d.category}</div>
-                    ${isEmergency ? '<span style="background: #FEE2E2; color: #991B1B; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.7rem;">EMERGENCY RESCUE</span>' : ''}
-                    <div style="margin-top: 6px; color: #334155;"><strong>Sector:</strong> ${d.address}</div>
-                    <div style="color: #334155;"><strong>Deadline:</strong> ${d.deadline || 'ASAP'}</div>
+                <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem; padding: 4px;">
+                    <div style="font-weight: 700; color: #244C38; font-size: 0.95rem;">${d.name}</div>
+                    <div style="color: #5C6C62; font-size: 0.75rem; margin-bottom: 4px;">${d.quantity} &bull; ${d.category}</div>
+                    ${isEmergency ? '<span style="background: #FDEEE7; color: #A33C0F; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.7rem;">EMERGENCY RESCUE</span>' : ''}
+                    <div style="margin-top: 6px; color: #232C27;"><strong>Kitchen Sector:</strong> ${d.address}</div>
+                    <div style="color: #232C27;"><strong>Collection Deadline:</strong> ${d.deadline || 'ASAP'}</div>
                     <div style="margin-top: 8px;">
-                        <a href="${d.passport_url}" style="background: #18A875; color: white; padding: 3px 8px; border-radius: 4px; text-decoration: none; font-size: 0.75rem; font-weight: 600;">View Passport</a>
+                        <a href="${d.passport_url}" style="background: #244C38; color: #FFF5E6; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 0.75rem; font-weight: 600;">View Food Passport</a>
                     </div>
                 </div>
             `;
@@ -132,17 +155,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             L.marker([d.lat, d.lng], { icon: customIcon }).bindPopup(popupContent).addTo(layerDonations);
         });
 
-        // 2. Add Certified NGOs
+        // 2. Add Relief NGOs
         (data.ngos || []).forEach(n => {
-            const iconHtml = `<div class="custom-marker" style="background: #18A875; width: 28px; height: 28px; font-size: 14px;">❤️</div>`;
-            const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [28, 28] });
+            const iconHtml = `<div class="custom-marker" style="background: #79A85A; width: 32px; height: 32px; font-size: 15px;">🏡</div>`;
+            const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [32, 32] });
 
             const popupContent = `
-                <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem;">
-                    <div style="font-weight: 700; color: #123D32; font-size: 0.95rem;">${n.name}</div>
-                    <div style="color: #64748B; font-size: 0.75rem; margin-bottom: 4px;">Certified Relief Shelter</div>
-                    <div><strong>Capacity:</strong> ${n.capacity} servings</div>
-                    <div style="margin-top: 4px;"><strong>Sector:</strong> ${n.address}</div>
+                <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem; padding: 4px;">
+                    <div style="font-weight: 700; color: #244C38; font-size: 0.95rem;">${n.name}</div>
+                    <div style="color: #5C6C62; font-size: 0.75rem; margin-bottom: 4px;">Certified Relief Shelter</div>
+                    <div><strong>Meal Capacity:</strong> ${n.capacity} servings</div>
+                    <div style="margin-top: 4px; color: #232C27;"><strong>Sector:</strong> ${n.address}</div>
                 </div>
             `;
 
@@ -151,13 +174,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 3. Add Volunteers
         (data.volunteers || []).forEach(v => {
-            const iconHtml = `<div class="custom-marker" style="background: #3B82F6; width: 26px; height: 26px; font-size: 12px;">🚲</div>`;
-            const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [26, 26] });
+            const iconHtml = `<div class="custom-marker" style="background: #F2B544; color: #244C38; width: 30px; height: 30px; font-size: 14px;">🚲</div>`;
+            const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [30, 30] });
 
             const popupContent = `
-                <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem;">
-                    <div style="font-weight: 700; color: #1E3A8A;">${v.name}</div>
-                    <span style="background: #D1FAE5; color: #065F46; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">Available on Call</span>
+                <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem; padding: 4px;">
+                    <div style="font-weight: 700; color: #244C38;">${v.name}</div>
+                    <span style="background: #EBF4E5; color: #2D581A; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">Courier Available on Call</span>
                 </div>
             `;
 
@@ -168,57 +191,59 @@ document.addEventListener('DOMContentLoaded', async () => {
         (data.transit_routes || []).forEach(r => {
             const latlngs = [[r.from_lat, r.from_lng], [r.to_lat, r.to_lng]];
             const polyline = L.polyline(latlngs, {
-                color: '#D97706',
-                weight: 3,
+                color: '#E87946',
+                weight: 3.5,
                 dashArray: '6, 6',
-                opacity: 0.8
+                opacity: 0.85
             }).addTo(layerTransit);
 
             polyline.bindPopup(`
-                <div style="font-family: 'Inter', sans-serif; font-size: 0.8rem;">
-                    <strong>Active Transit:</strong> ${r.food}<br>
+                <div style="font-family: 'Inter', sans-serif; font-size: 0.8rem; padding: 4px;">
+                    <strong style="color: #E87946;">Active Food Transit:</strong> ${r.food}<br>
                     <strong>Mission:</strong> ${r.mission_code}<br>
-                    <strong>Status:</strong> ${r.status}
+                    <strong>En Route to:</strong> ${r.destination_ngo}
                 </div>
             `);
         });
 
     } catch (e) {
-        console.error("Map layer data load error:", e);
+        console.error('Failed to load spatial map layers:', e);
     }
 
-    // Filter controls
-    document.querySelectorAll('#mapFilters button').forEach(btn => {
+    // Filter Buttons Interactivity
+    const filterBtns = document.querySelectorAll('#mapFilters button');
+    filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('#mapFilters button').forEach(b => {
+            filterBtns.forEach(b => {
                 b.classList.remove('btn-forest', 'active');
                 b.classList.add('btn-outline-forest');
             });
-            btn.classList.add('btn-forest', 'active');
             btn.classList.remove('btn-outline-forest');
+            btn.classList.add('btn-forest', 'active');
 
-            const f = btn.getAttribute('data-filter');
-            if (f === 'all') {
+            const filter = btn.getAttribute('data-filter');
+
+            if (filter === 'all') {
                 map.addLayer(layerDonations);
                 map.addLayer(layerNgos);
                 map.addLayer(layerVolunteers);
                 map.addLayer(layerTransit);
-            } else if (f === 'donations') {
+            } else if (filter === 'donations') {
                 map.addLayer(layerDonations);
                 map.removeLayer(layerNgos);
                 map.removeLayer(layerVolunteers);
                 map.removeLayer(layerTransit);
-            } else if (f === 'ngos') {
+            } else if (filter === 'ngos') {
                 map.removeLayer(layerDonations);
                 map.addLayer(layerNgos);
                 map.removeLayer(layerVolunteers);
                 map.removeLayer(layerTransit);
-            } else if (f === 'volunteers') {
+            } else if (filter === 'volunteers') {
                 map.removeLayer(layerDonations);
                 map.removeLayer(layerNgos);
                 map.addLayer(layerVolunteers);
                 map.removeLayer(layerTransit);
-            } else if (f === 'transit') {
+            } else if (filter === 'transit') {
                 map.removeLayer(layerDonations);
                 map.removeLayer(layerNgos);
                 map.removeLayer(layerVolunteers);

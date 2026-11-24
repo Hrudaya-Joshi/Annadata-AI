@@ -21,11 +21,11 @@
                 {% if notifications %}
                     <div class="list-group list-group-flush">
                         {% for n in notifications %}
-                            <div class="list-group-item p-3 d-flex align-items-start gap-3 {% if not n.is_read %}bg-light{% endif %}">
-                                <div style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-                                    {% if n.category == 'urgent' %}background: #FEE2E2; color: #DC2626;
-                                    {% elif n.category == 'success' %}background: #D1FAE5; color: #059669;
-                                    {% else %}background: #E0F2FE; color: #0284C7;{% endif %}">
+                            <div class="list-group-item p-3 d-flex align-items-start gap-3 {% if not n.is_read %}border-start border-3 border-forest{% endif %}" style="background-color: {% if not n.is_read %}rgba(36, 76, 56, 0.04){% else %}transparent{% endif %};">
+                                <div style="width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+                                    {% if n.category == 'urgent' %}background: rgba(232, 121, 70, 0.15); color: var(--terracotta);
+                                    {% elif n.category == 'success' %}background: rgba(121, 168, 90, 0.2); color: var(--forest-green);
+                                    {% else %}background: rgba(242, 181, 68, 0.2); color: #B47814;{% endif %}">
                                     {% if n.category == 'urgent' %}
                                         <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i>
                                     {% elif n.category == 'success' %}
@@ -38,12 +38,14 @@
                                 <div class="flex-grow-1">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div class="fw-bold text-dark">{{ n.title }}</div>
-                                        <span class="text-muted" style="font-size: 0.75rem;">{{ n.created_at.strftime('%d %b, %H:%M') }}</span>
+                                        <span class="text-muted font-monospace" style="font-size: 0.75rem;">{{ n.created_at.strftime('%d %b, %H:%M') }}</span>
                                     </div>
                                     <div class="small text-muted mt-1">{{ n.message }}</div>
                                     {% if n.link_url %}
                                         <div class="mt-2">
-                                            <a href="{{ n.link_url }}" class="small text-primary fw-semibold text-decoration-none">View Details &rarr;</a>
+                                            <a href="{{ n.link_url }}" class="small text-forest fw-semibold text-decoration-none">
+                                                Review Inbound Details &rarr;
+                                            </a>
                                         </div>
                                     {% endif %}
                                 </div>
@@ -52,9 +54,9 @@
                     </div>
                 {% else %}
                     <div class="text-center py-5 text-muted">
-                        <i data-lucide="bell-off" class="mb-2" style="width: 36px; height: 36px; opacity: 0.4;"></i>
-                        <div class="fw-semibold">No notifications yet</div>
-                        <div class="small">You're all caught up! Updates about your donations and missions will appear here.</div>
+                        <i data-lucide="bell-off" class="mb-2 text-muted" style="width: 36px; height: 36px; opacity: 0.4;"></i>
+                        <div class="fw-semibold text-dark">No network notifications</div>
+                        <div class="small">You're all caught up! Updates regarding live food rescues, dispatch alerts, and allocations will be announced here.</div>
                     </div>
                 {% endif %}
             </div>

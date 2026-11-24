@@ -1,217 +1,296 @@
 {% extends "base.html" %}
-{% block title %}Mission {{ mission.mission_code }} — ANNADATA AI{% endblock %}
+{% block title %}Rescue Mission {{ mission.mission_code }} — ANNADATA AI{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <!-- Top Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3 p-4 rounded-4"
+        style="background: var(--surface-white); border: 1.5px solid var(--border-warm); box-shadow: var(--shadow-sm);">
         <div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-primary text-white font-monospace">{{ mission.mission_code }}</span>
-                <span class="badge badge-soft badge-soft-success text-capitalize">{{ mission.status|replace('_', ' ') }}</span>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-forest text-cream font-monospace">{{ mission.mission_code }}</span>
+                <span class="badge badge-soft badge-fresh text-capitalize">{{ mission.status|replace('_', ' ') }}</span>
             </div>
-            <h3 class="fw-bold mb-0 text-dark">Food Rescue Mission Lifecourse</h3>
+            <h3 class="fw-bold text-forest mb-0">Food Rescue Mission Tracker</h3>
             <div class="text-muted small">Initiated {{ mission.created_at.strftime('%d %b %Y, %H:%M') }}</div>
         </div>
 
         <div class="d-flex gap-2">
-            <a href="{{ url_for('passport.view_passport', rescue_code=mission.donation.rescue_code or mission.donation.id) }}" class="btn btn-outline-forest btn-sm" target="_blank">
-                <i data-lucide="qr-code" class="me-1" style="width: 14px; height: 14px;"></i> Rescue Passport
+            <a href="{{ url_for('passport.view_passport', rescue_code=mission.donation.rescue_code or mission.donation.id) }}"
+                class="btn btn-outline-forest btn-sm" target="_blank">
+                <i data-lucide="qr-code" class="me-1" style="width: 14px; height: 14px;"></i> Food Passport
             </a>
-            <a href="{{ url_for('missions.list_missions') }}" class="btn btn-light border btn-sm">
+            <a href="{{ url_for('missions.list_missions') }}" class="btn btn-forest btn-sm">
                 All Missions
             </a>
         </div>
     </div>
 
     <!-- Delay Alert if past deadline -->
-    {% if mission.status in ['volunteer_assigned', 'pickup_initiated', 'food_collected', 'delivery_initiated'] and mission.pickup_deadline and mission.pickup_deadline < now %}
-        <div class="alert alert-danger border shadow-sm mb-4 d-flex align-items-center gap-3">
-            <i data-lucide="alert-triangle" class="text-danger" style="width: 24px; height: 24px;"></i>
-            <div>
-                <div class="fw-bold">Mission Delayed Alert</div>
-                <div class="small">The scheduled pickup deadline ({{ mission.pickup_deadline.strftime('%H:%M') }}) has elapsed. Priority courier escalation active.</div>
-            </div>
+    {% if mission.status in ['volunteer_assigned', 'pickup_initiated', 'food_collected', 'delivery_initiated'] and
+    mission.donation.collection_deadline and mission.donation.collection_deadline < now %} <div
+        class="alert alert-danger border shadow-sm mb-4 d-flex align-items-center gap-3">
+        <i data-lucide="alert-triangle" class="text-terracotta" style="width: 24px; height: 24px;"></i>
+        <div>
+            <div class="fw-bold">Mission Urgent Alert</div>
+            <div class="small">The scheduled collection deadline has elapsed. Courier dispatch is prioritized to prevent
+                food spoilage.</div>
         </div>
-    {% endif %}
+</div>
+{% endif %}
 
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <!-- 10-Stage Lifecycle Progress Bar -->
-            <div class="card-premium p-4 mb-4">
-                <h5 class="fw-bold text-primary mb-3">Mission Lifecycle Stages</h5>
-                
-                {% set stages = [
-                    ('submitted', 'Donation Logged'),
-                    ('safety_screening', 'Safety Screened'),
-                    ('ngo_matching', 'NGO Matched'),
-                    ('ngo_accepted', 'NGO Accepted'),
-                    ('volunteer_assigned', 'Courier Assigned'),
-                    ('pickup_initiated', 'Pickup En Route'),
-                    ('food_collected', 'Food Rescued'),
-                    ('delivery_initiated', 'In Transit'),
-                    ('delivery_confirmed', 'Verified Delivery'),
-                    ('completed', 'Completed')
-                ] %}
-
-                <div class="timeline">
-                    {% set current_found = false %}
-                    {% for st_key, st_label in stages %}
-                        <div class="timeline-item">
-                            <div class="timeline-point {% if mission.status == st_key %}bg-success border-success{% elif current_found %}pending{% endif %}"></div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="fw-bold {% if mission.status == st_key %}text-success{% elif current_found %}text-muted{% else %}text-dark{% endif %}">
-                                        {{ st_label }}
-                                    </div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">
-                                        {% if st_key == 'food_collected' and mission.pickup_time %}
-                                            Collected at {{ mission.pickup_time.strftime('%H:%M') }}
-                                        {% elif st_key == 'delivery_confirmed' and mission.delivery_time %}
-                                            Delivered at {{ mission.delivery_time.strftime('%H:%M') }}
-                                        {% elif mission.status == st_key %}
-                                            <span class="badge badge-soft badge-soft-warning">Current Stage</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% if mission.status == st_key %}
-                            {% set current_found = true %}
-                        {% endif %}
-                    {% endfor %}
-                </div>
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- 10-Stage Lifecycle Progress Tracker -->
+        <div class="card-premium p-4 mb-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i data-lucide="compass" class="text-forest" style="width: 20px; height: 20px;"></i>
+                <h5 class="fw-bold text-forest mb-0">10-Stage Rescue Mission Lifecycle</h5>
             </div>
 
-            <!-- Handover & PIN Verification Form -->
-            {% if mission.status in ['food_collected', 'delivery_initiated'] %}
-                <div class="card-premium p-4 border-2 border-emerald mb-4">
-                    <h5 class="fw-bold text-dark mb-2">Delivery Handover & Verification</h5>
-                    <p class="text-muted small mb-3">
-                        To guarantee food arrives safely at the destination shelter, the NGO must verify delivery with the 6-digit confirmation PIN.
-                    </p>
+            {% set stages = [
+            ('submitted', 'Donation Logged'),
+            ('safety_screening', 'Safety Screened'),
+            ('ngo_matching', 'NGO Matched'),
+            ('ngo_accepted', 'NGO Accepted'),
+            ('volunteer_assigned', 'Courier Assigned'),
+            ('pickup_initiated', 'Pickup En Route'),
+            ('food_collected', 'Food Rescued'),
+            ('delivery_initiated', 'In Transit'),
+            ('delivery_confirmed', 'Verified Delivery'),
+            ('completed', 'Completed & Sealed')
+            ] %}
 
-                    <div class="p-3 bg-light rounded border mb-3 text-center">
-                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.7rem;">Mission Handover PIN</div>
-                        <div class="display-6 fw-bold font-monospace text-primary tracking-wide">
-                            {{ mission.verification_pin or '748291' }}
-                        </div>
-                        <div class="small text-muted mt-1" style="font-size: 0.75rem;">
-                            Volunteer displays this PIN to the receiving NGO coordinator upon handover.
+            <div class="timeline">
+                {% set current_found = false %}
+                {% for st_key, st_label in stages %}
+                <div class="timeline-item">
+                    <div
+                        class="timeline-point {% if mission.status == st_key %}completed{% elif current_found %}pending{% endif %}">
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div
+                                class="fw-bold {% if mission.status == st_key %}text-forest{% elif current_found %}text-muted{% else %}text-leaf{% endif %}">
+                                {{ st_label }}
+                            </div>
+                            <div class="text-muted" style="font-size: 0.75rem;">
+                                {% if st_key == 'food_collected' and mission.pickup_time %}
+                                Collected at {{ mission.pickup_time.strftime('%H:%M') }}
+                                {% elif st_key == 'delivery_confirmed' and mission.delivery_time %}
+                                Delivered at {{ mission.delivery_time.strftime('%H:%M') }}
+                                {% elif mission.status == st_key %}
+                                <span class="badge badge-soft badge-harvest">Current Active Phase</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-
-                    {% if current_user.role in ['ngo', 'admin'] %}
-                        <form method="POST" action="{{ url_for('missions.verify_delivery_pin', mission_id=mission.id) }}">
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold">Enter Courier PIN to Confirm Receipt *</label>
-                                <input type="text" name="pin" class="form-control form-control-lg font-monospace text-center" placeholder="6-digit PIN" required style="max-width: 240px; margin: 0 auto;">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold">Receiving Notes / Temperature at Delivery</label>
-                                <input type="text" name="notes" class="form-control form-control-sm" placeholder="e.g. Received in hot insulated bags, visual check passed">
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-emerald py-2 fw-bold">
-                                    <i data-lucide="check-circle" class="me-1" style="width: 16px; height: 16px;"></i> Verify Handover & Confirm Impact
-                                </button>
-                            </div>
-                        </form>
-                    {% endif %}
                 </div>
-            {% endif %}
-
-            <!-- Interactive State Transitions (Authorized Roles) -->
-            {% if allowed_next_states %}
-                <div class="card-premium p-4 mb-4">
-                    <h6 class="fw-bold text-dark mb-3">Authorized Mission State Transitions</h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        {% for st in allowed_next_states %}
-                            {% if st != 'cancelled' %}
-                                <form method="POST" action="{{ url_for('missions.transition_mission', mission_id=mission.id) }}" class="d-inline">
-                                    <input type="hidden" name="new_status" value="{{ st }}">
-                                    <button type="submit" class="btn btn-forest btn-sm text-capitalize">
-                                        Advance to: {{ st|replace('_', ' ') }}
-                                    </button>
-                                </form>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if 'cancelled' in allowed_next_states %}
-                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal">
-                                Cancel Mission
-                            </button>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endif %}
+                {% if mission.status == st_key %}
+                {% set current_found = true %}
+                {% endif %}
+                {% endfor %}
+            </div>
         </div>
 
-        <!-- Sidebar: Logistics, Donor, and Shelter Details -->
-        <div class="col-lg-4">
-            <!-- Food Item Card -->
-            <div class="card-premium p-4 mb-4">
-                <span class="badge badge-soft badge-soft-secondary text-capitalize mb-2">{{ mission.donation.category }}</span>
-                <h5 class="fw-bold text-dark mb-1">{{ mission.donation.food_name }}</h5>
-                <div class="fw-semibold text-success mb-3">{{ mission.donation.quantity }} {{ mission.donation.unit }}</div>
 
-                <div class="small border-top pt-2 d-flex flex-column gap-2 text-muted">
-                    <div>
-                        <strong>Donor Restaurant:</strong>
-                        <div>{{ mission.donation.restaurant.business_name if mission.donation.restaurant else 'Verified Donor' }}</div>
-                        <div style="font-size: 0.75rem;">{{ mission.donation.location_address }}</div>
-                    </div>
-                    <div class="pt-2 border-top">
-                        <strong>Receiving Shelter:</strong>
-                        <div>{{ mission.destination_ngo.organization_name }}</div>
-                        <div style="font-size: 0.75rem;">{{ mission.destination_ngo.location_address }}</div>
-                    </div>
-                    <div class="pt-2 border-top">
-                        <strong>Assigned Courier:</strong>
-                        <div>{{ mission.courier_volunteer.user.full_name if mission.courier_volunteer else 'Unassigned' }}</div>
-                    </div>
-                </div>
+
+        <!-- Role-Based Handover PIN Display -->
+
+        {% set is_donor = current_user.role == 'restaurant' and current_user.restaurant and mission.donation and
+        current_user.restaurant.id == mission.donation.restaurant_id %}
+        {% set is_receiving_ngo = current_user.role == 'ngo' and current_user.ngo and current_user.ngo.id ==
+        mission.ngo_id %}
+        {% set is_assigned_volunteer = current_user.role == 'volunteer' and current_user.volunteer and
+        mission.volunteer_id == current_user.volunteer.id %}
+
+        {% if is_donor or is_receiving_ngo %}
+        <div class="card-premium p-4 mb-4" style="background: var(--surface-cream);">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i data-lucide="key" class="text-harvest" style="width: 20px; height: 20px;"></i>
+                <h5 class="fw-bold text-forest mb-0">Handover Verification PIN</h5>
             </div>
 
-            <!-- Reassign Volunteer (Admins / NGOs) -->
-            {% if current_user.role in ['admin', 'ngo'] and available_volunteers and mission.status not in ['completed', 'cancelled'] %}
-                <div class="card-premium p-4">
-                    <h6 class="fw-bold mb-2">Reassign Volunteer Courier</h6>
-                    <form method="POST" action="{{ url_for('missions.assign_volunteer', mission_id=mission.id) }}">
-                        <div class="mb-3">
-                            <select name="volunteer_id" class="form-select form-select-sm">
-                                {% for v in available_volunteers %}
-                                    <option value="{{ v.id }}">{{ v.user.full_name }} ({{ v.vehicle_type }})</option>
-                                {% endfor %}
-                            </select>
+            <div class="row g-3">
+                {% if is_donor %}
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 border border-warm text-center">
+                        <span class="small text-muted fw-bold text-uppercase d-block">Kitchen Collection PIN</span>
+                        <div class="fs-2 fw-bold font-monospace text-forest my-1">
+                            {{ mission.pickup_pin or 'Not Generated' }}
                         </div>
-                        <button type="submit" class="btn btn-outline-forest btn-sm w-100">Reassign Courier</button>
-                    </form>
+                        <div class="small text-muted">
+                            Collection ke samay ye PIN assigned volunteer ko dein.
+                        </div>
+                    </div>
                 </div>
-            {% endif %}
+                {% endif %}
+
+                {% if is_receiving_ngo %}
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 border border-warm text-center">
+                        <span class="small text-muted fw-bold text-uppercase d-block">Shelter Delivery PIN</span>
+                        <div class="fs-2 fw-bold font-monospace text-leaf my-1">
+                            {{ mission.verification_pin or 'Not Generated' }}
+                        </div>
+                        <div class="small text-muted">
+                            Food milne par ye PIN assigned volunteer ko dein.
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
+        {% endif %}
+
+
+        <!-- Volunteer PIN Entry Forms -->
+
+        {% if is_assigned_volunteer and mission.status == 'pickup_initiated' %}
+        <div class="card-premium p-4 mb-4">
+            <h5 class="fw-bold text-forest mb-2">Kitchen Collection Verification</h5>
+            <p class="text-muted small">Kitchen se mila hua 6-digit PIN yahan bharein.</p>
+
+            <form method="POST" action="{{ url_for('missions.verify_pickup_pin', mission_id=mission.id) }}">
+                <div class="row g-2 align-items-center">
+                    <div class="col-sm-6">
+                        <input type="text" name="pin" class="form-control font-monospace text-center fs-5"
+                            placeholder="Enter Kitchen PIN" maxlength="6" minlength="6" pattern="[0-9]{6}"
+                            inputmode="numeric" required>
+                    </div>
+                    <div class="col-sm-6">
+                        <button type="submit" class="btn btn-forest w-100 py-2 fw-bold">
+                            Verify Pickup PIN
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+
+        {% if is_assigned_volunteer and mission.status == 'delivery_initiated' %}
+        <div class="card-premium p-4 mb-4">
+            <h5 class="fw-bold text-forest mb-2">Shelter Delivery Verification</h5>
+            <p class="text-muted small">Shelter se mila hua 6-digit PIN yahan bharein.</p>
+
+            <form method="POST" action="{{ url_for('missions.verify_delivery_pin', mission_id=mission.id) }}">
+                <div class="row g-2 align-items-center">
+                    <div class="col-sm-6">
+                        <input type="text" name="pin" class="form-control font-monospace text-center fs-5"
+                            placeholder="Enter Shelter PIN" maxlength="6" minlength="6" pattern="[0-9]{6}"
+                            inputmode="numeric" required>
+                    </div>
+                    <div class="col-sm-6">
+                        <button type="submit" class="btn btn-leaf w-100 py-2 fw-bold">
+                            Verify Delivery PIN
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+
+
+        <!-- Interactive State Transitions (Authorized Roles) -->
+        {% if allowed_next_states %}
+        <div class="card-premium p-4 mb-4">
+            <h6 class="fw-bold text-forest mb-3">Authorized Mission Transitions</h6>
+            <div class="d-flex flex-wrap gap-2">
+                {% for st in allowed_next_states %}
+                {% if st not in ['cancelled', 'food_collected', 'delivery_confirmed'] %}
+                <form method="POST" action="{{ url_for('missions.transition_mission', mission_id=mission.id) }}"
+                    class="d-inline">
+                    <input type="hidden" name="new_status" value="{{ st }}">
+                    <button type="submit" class="btn btn-forest btn-sm text-capitalize">
+                        Advance to: {{ st|replace('_', ' ') }}
+                    </button>
+                </form>
+                {% endif %}
+                {% endfor %}
+
+                {% if 'cancelled' in allowed_next_states %}
+                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#cancelModal">
+                    Cancel Mission
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
+
+    <!-- Sidebar: Logistics, Donor, and Shelter Details -->
+    <div class="col-lg-4">
+        <!-- Food Batch Card -->
+        <div class="card-premium p-4 mb-4" style="background: var(--surface-cream);">
+            <span class="badge badge-soft badge-fresh text-capitalize mb-2">{{ mission.donation.category }}</span>
+            <h5 class="fw-bold text-forest mb-1">{{ mission.donation.food_name }}</h5>
+            <div class="fw-bold text-leaf fs-5 mb-3">{{ mission.donation.quantity }} {{ mission.donation.unit }}</div>
+
+            <div class="small border-top border-warm pt-2 d-flex flex-column gap-3 text-muted">
+                <div>
+                    <strong class="text-forest">Donor Kitchen:</strong>
+                    <div>{{ mission.donation.restaurant.business_name if mission.donation.restaurant else 'Verified
+                        Donor' }}</div>
+                    <div style="font-size: 0.75rem;">{{ mission.donation.location_address }}</div>
+                </div>
+                <div class="pt-2 border-top border-warm">
+                    <strong class="text-forest">Receiving Shelter:</strong>
+                    <div>{{ mission.destination_ngo.organization_name }}</div>
+                    <div style="font-size: 0.75rem;">{{ mission.destination_ngo.location_address }}</div>
+                </div>
+                <div class="pt-2 border-top border-warm">
+                    <strong class="text-forest">Assigned Courier:</strong>
+                    <div>{{ mission.courier_volunteer.user.full_name if mission.courier_volunteer else 'Unassigned' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reassign Volunteer (Admins / NGOs) -->
+        {% if current_user.role in ['admin', 'ngo'] and available_volunteers and mission.status not in ['completed',
+        'cancelled'] %}
+        <div class="card-premium p-4">
+            <h6 class="fw-bold text-forest mb-2">Reassign Courier Volunteer</h6>
+            <form method="POST" action="{{ url_for('missions.assign_volunteer', mission_id=mission.id) }}">
+                <div class="mb-3">
+                    <select name="volunteer_id" class="form-select form-select-sm">
+                        {% for v in available_volunteers %}
+                        <option value="{{ v.id }}">{{ v.user.full_name }} ({{ v.vehicle_type }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-outline-forest btn-sm w-100">Reassign Courier</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
 </div>
 
 <!-- Modal: Cancel Mission -->
 <div class="modal fade" id="cancelModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Cancel Rescue Mission</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content card-cream border-2 border-warm">
+            <div class="modal-header bg-forest text-white">
+                <h5 class="modal-title fw-bold text-white">Cancel Rescue Mission</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="{{ url_for('missions.transition_mission', mission_id=mission.id) }}">
                 <input type="hidden" name="new_status" value="cancelled">
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Cancellation Reason *</label>
-                        <textarea name="notes" class="form-control" rows="3" placeholder="e.g. Donor kitchen closed unexpectedly, food spoiled before courier arrival" required></textarea>
+                        <label class="form-label small fw-semibold text-forest">Cancellation Reason *</label>
+                        <textarea name="notes" class="form-control" rows="3"
+                            placeholder="e.g. Donor kitchen closed unexpectedly, food spoiled before courier arrival"
+                            required></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-danger btn-sm">Confirm Cancellation</button>
+                <div class="modal-footer border-top border-warm">
+                    <button type="button" class="btn btn-outline-forest btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-terracotta btn-sm">Confirm Cancellation</button>
                 </div>
             </form>
         </div>

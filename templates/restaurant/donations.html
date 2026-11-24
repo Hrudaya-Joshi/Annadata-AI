@@ -1,28 +1,38 @@
 {% extends "base.html" %}
-{% block title %}Donation History — ANNADATA AI{% endblock %}
+{% block title %}Kitchen Donation Archive — ANNADATA AI{% endblock %}
 
 {% block content %}
 <div class="container-fluid px-lg-5 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Header Banner -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3 p-4 rounded-4" style="background: var(--surface-white); border: 1.5px solid var(--border-warm); box-shadow: var(--shadow-sm);">
         <div>
-            <h3 class="fw-bold mb-1">Surplus Donation History</h3>
-            <p class="text-muted small mb-0">Complete historical archive of food rescued from {{ restaurant.business_name }}</p>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge badge-soft badge-fresh">Food Rescue Log</span>
+                <span class="text-muted small">&bull; {{ restaurant.business_name }}</span>
+            </div>
+            <h2 class="fw-bold text-forest mb-0">Kitchen Surplus Donation History</h2>
+            <div class="text-muted small">Complete chronological archive of surplus food rescued from your kitchen</div>
         </div>
-        <a href="{{ url_for('restaurant.donate') }}" class="btn btn-emerald btn-sm">
-            <i data-lucide="plus-circle" class="me-1" style="width: 14px; height: 14px;"></i> Log New Donation
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('restaurant.dashboard') }}" class="btn btn-outline-forest btn-sm">
+                &larr; Kitchen Dashboard
+            </a>
+            <a href="{{ url_for('restaurant.donate') }}" class="btn btn-forest btn-sm shadow-sm">
+                <i data-lucide="plus-circle" class="me-1" style="width: 14px; height: 14px;"></i> Post New Batch
+            </a>
+        </div>
     </div>
 
     <div class="card-premium">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr class="small text-muted">
-                        <th>Date</th>
-                        <th>Passport ID</th>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Passport Code</th>
                         <th>Food Item</th>
                         <th>Category</th>
-                        <th>Quantity</th>
+                        <th>Portions</th>
                         <th>Safety Score</th>
                         <th>Lifecycle Status</th>
                         <th class="text-end">Actions</th>
@@ -32,45 +42,45 @@
                     {% if donations %}
                         {% for d in donations %}
                             <tr>
-                                <td class="small text-muted">{{ d.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td class="small text-muted font-monospace">{{ d.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
                                 <td>
-                                    <a href="{{ url_for('passport.view_passport', rescue_code=d.rescue_code or d.id) }}" class="fw-bold text-primary font-monospace" style="font-size: 0.8rem;">
+                                    <a href="{{ url_for('passport.view_passport', rescue_code=d.rescue_code or d.id) }}" class="fw-bold text-forest font-monospace" style="font-size: 0.8rem;">
                                         {{ d.rescue_code or ('#' ~ d.id) }}
                                     </a>
                                 </td>
-                                <td class="fw-semibold text-dark">{{ d.food_name }}</td>
-                                <td><span class="badge badge-soft badge-soft-secondary text-capitalize">{{ d.category }}</span></td>
-                                <td>{{ d.quantity }} {{ d.unit }}</td>
+                                <td class="fw-bold text-forest">{{ d.food_name }}</td>
+                                <td><span class="food-category-pill">{{ d.category|capitalize }}</span></td>
+                                <td class="fw-semibold text-leaf">{{ d.quantity }} {{ d.unit }}</td>
                                 <td>
                                     {% if d.suitability_score and d.suitability_score >= 80 %}
-                                        <span class="badge badge-soft badge-soft-success">{{ d.suitability_score }}% Verified</span>
+                                        <span class="badge badge-soft badge-fresh">{{ d.suitability_score }}% Verified</span>
                                     {% elif d.suitability_score and d.suitability_score > 0 %}
-                                        <span class="badge badge-soft badge-soft-warning">{{ d.suitability_score }}%</span>
+                                        <span class="badge badge-soft badge-harvest">{{ d.suitability_score }}%</span>
                                     {% else %}
-                                        <span class="badge badge-soft badge-soft-danger">Flagged</span>
+                                        <span class="badge badge-soft badge-urgent">Flagged</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if d.status in ['delivered', 'completed'] %}
-                                        <span class="badge badge-soft badge-soft-success">Delivered</span>
+                                        <span class="badge badge-soft badge-fresh">Delivered Safe</span>
                                     {% elif d.status in ['matched', 'requested'] %}
-                                        <span class="badge badge-soft badge-soft-info">NGO Matched</span>
+                                        <span class="badge badge-soft badge-harvest">NGO Matched</span>
                                     {% elif d.status == 'unsuitable' %}
-                                        <span class="badge badge-soft badge-soft-danger">Unsuitable</span>
+                                        <span class="badge badge-soft badge-urgent">Unsuitable</span>
                                     {% else %}
-                                        <span class="badge badge-soft badge-soft-warning text-dark">{{ d.status|replace('_', ' ')|capitalize }}</span>
+                                        <span class="badge badge-soft badge-rescue text-capitalize">{{ d.status|replace('_', ' ') }}</span>
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
                                     <a href="{{ url_for('restaurant.donation_detail', donation_id=d.id) }}" class="btn btn-sm btn-outline-forest py-1 px-2" style="font-size: 0.8rem;">
-                                        Review
+                                        Details &rarr;
                                     </a>
                                 </td>
                             </tr>
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">No historical donations found.</td>
+                            <td colspan="8" class="text-center py-5 text-muted">No food surplus batches logged yet.</td>
                         </tr>
                     {% endif %}
                 </tbody>

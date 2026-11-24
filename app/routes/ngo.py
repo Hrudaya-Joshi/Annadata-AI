@@ -244,15 +244,23 @@ def create_demand():
     if not ngo:
         return redirect(url_for('main.home'))
 
-    category = request.form.get('category', 'cooked meals').strip()
-    qty = int(request.form.get('required_quantity', 50))
-    urgency = request.form.get('urgency_level', 'normal')
+    donation_category = (request.form.get('donation_category') or 'prepared_food').strip().lower()
+    category = (request.form.get('category') or request.form.get('food_category') or 'cooked meals').strip()
+    qty_val = request.form.get('required_quantity') or request.form.get('required_servings') or 50
+    try:
+        qty = int(qty_val)
+    except (TypeError, ValueError):
+        qty = 50
+    unit = request.form.get('unit', 'meals' if donation_category == 'prepared_food' else 'kg')
+    urgency = request.form.get('urgency_level') or request.form.get('urgency') or 'normal'
     notes = request.form.get('notes', '')
 
     demand = BeneficiaryDemand(
         ngo_id=ngo.id,
+        donation_category=donation_category,
         category=category,
         required_quantity=qty,
+        unit=unit,
         urgency_level=urgency,
         notes=notes
     )

@@ -112,66 +112,22 @@ def accept_pickup(assignment_id):
     return redirect(url_for('volunteer.dashboard'))
 
 
+
 @volunteer_bp.route('/pickup/<int:assignment_id>/picked-up', methods=['POST'])
 @login_required
 def mark_picked_up(assignment_id):
-    volunteer = get_current_volunteer()
-    if not volunteer:
-        return redirect(url_for('main.home'))
-
-    assignment = PickupAssignment.query.get_or_404(assignment_id)
-    if assignment.volunteer_id != volunteer.id:
-        flash('Access denied.', 'danger')
-        return redirect(url_for('volunteer.dashboard'))
-
-    try:
-        now = datetime.utcnow()
-        assignment.status = 'picked_up'
-        assignment.picked_up_at = now
-
-        req = assignment.request
-        if req and req.donation:
-            mission = RescueMission.query.filter_by(donation_id=req.donation.id).first()
-            if mission:
-                MissionService.transition_state(mission, 'food_collected', current_user, "Food verified and collected by volunteer.")
-
-        db.session.commit()
-        flash('Food collection confirmed! Proceed to the destination NGO.', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error confirming pickup: {str(e)}', 'danger')
-
+    flash(
+        'Please verify the Kitchen PIN on the Rescue Mission page to confirm pickup.',
+        'warning'
+    )
     return redirect(url_for('volunteer.dashboard'))
 
 
 @volunteer_bp.route('/pickup/<int:assignment_id>/delivered', methods=['POST'])
 @login_required
 def mark_delivered(assignment_id):
-    volunteer = get_current_volunteer()
-    if not volunteer:
-        return redirect(url_for('main.home'))
-
-    assignment = PickupAssignment.query.get_or_404(assignment_id)
-    if assignment.volunteer_id != volunteer.id:
-        flash('Access denied.', 'danger')
-        return redirect(url_for('volunteer.dashboard'))
-
-    try:
-        now = datetime.utcnow()
-        assignment.status = 'delivered'
-        assignment.delivered_at = now
-
-        req = assignment.request
-        if req and req.donation:
-            mission = RescueMission.query.filter_by(donation_id=req.donation.id).first()
-            if mission:
-                MissionService.transition_state(mission, 'delivery_confirmed', current_user, "Delivered to destination NGO.")
-
-        volunteer.available = True
-        db.session.commit()
-        flash('Delivery completed! Thank you for your service.', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error confirming delivery: {str(e)}', 'danger')
-
+    flash(
+        'Please verify the Shelter PIN on the Rescue Mission page to confirm delivery.',
+        'warning'
+    )
     return redirect(url_for('volunteer.dashboard'))

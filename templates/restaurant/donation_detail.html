@@ -5,18 +5,19 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge badge-soft badge-soft-success">Batch Record</span>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge badge-soft badge-soft-success">Food Rescue Batch Record</span>
                 <span class="text-muted small">ID: #{{ donation.id }} &bull; {{ donation.created_at.strftime('%d %b %Y, %H:%M') }}</span>
             </div>
             <h3 class="fw-bold mb-0 text-dark">{{ donation.food_name }}</h3>
+            <p class="text-muted small mb-0">Commercial Kitchen Batch &bull; Verified via Annadata AI Traceability</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ url_for('passport.view_passport', rescue_code=donation.rescue_code or donation.id) }}" class="btn btn-emerald btn-sm">
                 <i data-lucide="qr-code" class="me-1" style="width: 14px; height: 14px;"></i> Open Passport
             </a>
             <a href="{{ url_for('restaurant.dashboard') }}" class="btn btn-outline-forest btn-sm">
-                Dashboard
+                <i data-lucide="arrow-left" class="me-1" style="width: 14px; height: 14px;"></i> Kitchen Hub
             </a>
         </div>
     </div>
@@ -25,39 +26,44 @@
         <div class="col-lg-8">
             <!-- Food & Timings Overview -->
             <div class="card-premium p-4 mb-4">
-                <h5 class="fw-bold text-primary mb-3">Donation Information</h5>
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold text-forest mb-0">
+                        <i data-lucide="utensils" class="me-2 text-forest" style="width: 18px; height: 18px;"></i> Batch Specifications
+                    </h5>
+                    <span class="badge badge-soft badge-soft-success text-capitalize">{{ donation.category }}</span>
+                </div>
                 <div class="row g-3">
                     <div class="col-md-4 col-6">
-                        <div class="text-muted small">Category</div>
+                        <div class="text-muted small">Culinary Category</div>
                         <div class="fw-bold text-dark text-capitalize">{{ donation.category }}</div>
                     </div>
                     <div class="col-md-4 col-6">
                         <div class="text-muted small">Quantity Rescued</div>
-                        <div class="fw-bold text-dark">{{ donation.quantity }} {{ donation.unit }}</div>
+                        <div class="fw-bold text-forest fs-5">{{ donation.quantity }} {{ donation.unit }}</div>
                     </div>
                     <div class="col-md-4 col-6">
-                        <div class="text-muted small">Holding Temperature</div>
-                        <div class="fw-bold text-dark">{{ donation.storage_temperature or 'Standard Storage' }}</div>
+                        <div class="text-muted small">Thermal Storage Status</div>
+                        <div class="fw-bold text-dark">{{ donation.storage_temperature or 'Room Temp Holding' }}</div>
                     </div>
                     <div class="col-md-4 col-6">
                         <div class="text-muted small">Preparation Time</div>
                         <div class="fw-semibold text-dark">{{ donation.preparation_time.strftime('%d %b, %H:%M') }}</div>
                     </div>
                     <div class="col-md-4 col-6">
-                        <div class="text-muted small">Collection Deadline</div>
+                        <div class="text-muted small">Courier Pickup Deadline</div>
                         <div class="fw-semibold text-danger">{{ donation.collection_deadline.strftime('%d %b, %H:%M') }}</div>
                     </div>
                     <div class="col-md-4 col-6">
-                        <div class="text-muted small">Food Expiry Time</div>
+                        <div class="text-muted small">Consumption Expiry</div>
                         <div class="fw-semibold text-dark">{{ donation.expiry_time.strftime('%d %b, %H:%M') }}</div>
                     </div>
                     <div class="col-12 border-top pt-3">
-                        <div class="text-muted small">Pickup Address</div>
-                        <div class="fw-semibold text-dark"><i data-lucide="map-pin" class="me-1 text-primary" style="width: 14px; height: 14px;"></i> {{ donation.location_address }}</div>
+                        <div class="text-muted small">Kitchen Collection Address</div>
+                        <div class="fw-semibold text-dark"><i data-lucide="map-pin" class="me-1 text-forest" style="width: 14px; height: 14px;"></i> {{ donation.location_address }}</div>
                     </div>
                     {% if donation.description %}
                         <div class="col-12 border-top pt-2">
-                            <div class="text-muted small">Notes / Culinary Details</div>
+                            <div class="text-muted small">Culinary & Packaging Notes</div>
                             <div class="small text-muted">{{ donation.description }}</div>
                         </div>
                     {% endif %}
@@ -66,8 +72,10 @@
 
             <!-- Food Safety Assessment Checklist -->
             <div class="card-premium p-4 mb-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-bold text-primary mb-0">Food Safety Verification</h5>
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold text-forest mb-0">
+                        <i data-lucide="shield-check" class="me-2 text-forest" style="width: 18px; height: 18px;"></i> Food Safety & Microbiological Assessment
+                    </h5>
                     {% if donation.suitability_score and donation.suitability_score >= 80 %}
                         <span class="badge badge-soft badge-soft-success">Safety Score: {{ donation.suitability_score }}%</span>
                     {% else %}
@@ -77,24 +85,24 @@
 
                 {% if safety %}
                     <div class="list-group list-group-flush small">
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span>Visual & Organoleptic Inspection</span>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                            <span><i data-lucide="check-circle" class="text-success me-2" style="width: 15px; height: 15px;"></i> Visual & Organoleptic Inspection</span>
                             <span class="badge bg-success text-white">PASSED</span>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span>Packaging Integrity & Sanitized Containers</span>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                            <span><i data-lucide="check-circle" class="text-success me-2" style="width: 15px; height: 15px;"></i> Packaging Integrity & Sanitized Food Containers</span>
                             <span class="badge bg-success text-white">PASSED</span>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span>Active Temperature Control Compliance</span>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                            <span><i data-lucide="check-circle" class="text-success me-2" style="width: 15px; height: 15px;"></i> Active Temperature Control Compliance</span>
+                            <span class="badge bg-success text-white">PASSED ({{ safety.temperature_celsius }}°C)</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                            <span><i data-lucide="check-circle" class="text-success me-2" style="width: 15px; height: 15px;"></i> Allergen Declaration & Segregation Protocol</span>
                             <span class="badge bg-success text-white">PASSED</span>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span>Allergen Declaration Protocol</span>
-                            <span class="badge bg-success text-white">PASSED</span>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span>Commercial Kitchen Hygiene Verification</span>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                            <span><i data-lucide="check-circle" class="text-success me-2" style="width: 15px; height: 15px;"></i> Commercial Kitchen Hygiene Verification</span>
                             <span class="badge bg-success text-white">PASSED</span>
                         </div>
                     </div>

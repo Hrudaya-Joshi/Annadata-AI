@@ -51,10 +51,69 @@ class MissionService:
         return f"ANN-MSN-{date_str}-{rand_suffix}"
 
     @classmethod
-    def create_mission_for_request(cls, donation: FoodDonation, ngo: NGO, volunteer: Volunteer = None) -> RescueMission:
+    def get_category_handling_instructions(cls, donation: FoodDonation) -> dict:
+        """Return standardized handling and transit guidelines for couriers by category."""
+        cat = (donation.donation_category or "prepared_food").lower() if donation else "prepared_food"
+        if cat == "fresh_produce":
+            return {
+                "category": "Fresh Produce",
+                "icon": "apple",
+                "color": "var(--leaf-green)",
+                "urgency_badge": "Moderate Window",
+                "badge_class": "badge-soft-success",
+                "instructions": [
+                    "Transport in clean, well-ventilated, sturdy crates.",
+                    "Never stack heavy bags or cartons directly on top of delicate produce.",
+                    "Shield produce from direct sunlight, engine heat, and rain.",
+                    "Verify firmness and visual freshness with donor upon collection."
+                ],
+                "handling_tag": "Ventilated Crate Transit"
+            }
+        elif cat == "raw_ingredients":
+            return {
+                "category": "Raw Food Ingredients",
+                "icon": "package",
+                "color": "var(--harvest-yellow)",
+                "urgency_badge": "Dry Cargo Window",
+                "badge_class": "badge-soft-warning",
+                "instructions": [
+                    "Maintain 100% moisture-free cargo space; use tarpaulin for outdoor transit.",
+                    "Inspect bag seams, burlap weaves, and seals for punctures or tears.",
+                    "Practice safe lifting posture for heavy bulk sacks (>20 kg).",
+                    "Keep sacks elevated off wet vehicle flooring."
+                ],
+                "handling_tag": "Moisture-Protected Dry Cargo"
+            }
+        else:
+            return {
+                "category": "Prepared Food",
+                "icon": "utensils",
+                "color": "var(--terracotta)",
+                "urgency_badge": "Express Urgent Window (<45 mins)",
+                "badge_class": "badge-soft-danger",
+                "instructions": [
+                    "Maintain active thermal holding chain (>60°C hot meals, <5°C cold dishes).",
+                    "Keep containers strictly upright to avoid spills and seal damage.",
+                    "Express transit: Proceed directly to destination shelter without intermediate stops.",
+                    "Confirm temperature reading with NGO intake manager upon arrival."
+                ],
+                "handling_tag": "Active Thermal Holding Chain"
+            }
+
+    @classmethod
+    def create_mission_for_request(cls, donation: FoodDonation, ngo: NGO, volunteer: Volunteer=None) -> RescueMission:
         """Create a new tracked rescue mission when an NGO accepts a donation."""
         code = cls.generate_mission_code()
-        pin = str(random.randint(100000, 999999))
+        pickup_pin = str(random.randint(100000, 999999))
+        delivery_pin = str(random.randint(100000, 999999))
+
+        d_cat = (donation.donation_category or "prepared_food").lower()
+        if d_cat == "raw_ingredients":
+            extra_hours = 8
+        elif d_cat == "fresh_produce":
+            extra_hours = 4
+        else:
+            extra_hours = 1
 
         mission = RescueMission(
             mission_code=code,
@@ -63,8 +122,9 @@ class MissionService:
             volunteer_id=volunteer.id if volunteer else None,
             status='volunteer_assigned' if volunteer else 'ngo_accepted',
             pickup_deadline=donation.collection_deadline,
-            delivery_deadline=donation.collection_deadline + timedelta(hours=1),
-            verification_pin=pin
+            delivery_deadline=donation.collection_deadline + timedelta(hours=extra_hours),
+            pickup_pin=pickup_pin,
+            verification_pin=delivery_pin
         )
         db.session.add(mission)
         db.session.flush()
@@ -94,9 +154,17 @@ class MissionService:
         return mission
 
     @classmethod
-    def transition_state(cls, mission: RescueMission, new_status: str, actor_user: User, notes: str = None) -> tuple[bool, str]:
+    def transition_state(
+        cls,
+        mission: RescueMission,
+        new_status: str,
+        actor_user: User,
+        notes: str=None,
+        pin: str=None
+    ) -> tuple[bool, str]:
         """
-        Execute server-side validated state transition with security & audit checks.
+        Execute a validated mission transition.
+        Pickup and delivery confirmation require the assigned volunteer's valid PIN.
         """
         current = mission.status
         allowed = cls.VALID_TRANSITIONS.get(current, [])
@@ -104,24 +172,49 @@ class MissionService:
         if new_status not in allowed:
             return False, f"Illegal state transition from '{current}' to '{new_status}'."
 
+        # PIN verification is mandatory for food collection and delivery.
+        if new_status in ['food_collected', 'delivery_confirmed']:
+            if not actor_user or actor_user.role != 'volunteer':
+                return False, "Only the assigned volunteer can verify this handover."
+
+            volunteer = getattr(actor_user, 'volunteer', None)
+            if not volunteer or mission.volunteer_id != volunteer.id:
+                return False, "Only the assigned volunteer can verify this handover."
+
+            if new_status == 'food_collected':
+                expected_pin = mission.pickup_pin
+                pin_label = "Kitchen Collection PIN"
+            else:
+                expected_pin = mission.verification_pin
+                pin_label = "Shelter Delivery PIN"
+
+            if not expected_pin:
+                return False, f"{pin_label} has not been generated. Contact the administrator."
+
+            if not pin or pin.strip() != expected_pin:
+                return False, f"Invalid {pin_label}. Confirmation denied."
+
         now = datetime.utcnow()
 
         if new_status == 'pickup_initiated':
             pass
+
         elif new_status == 'food_collected':
             mission.pickup_time = now
             if mission.donation:
                 mission.donation.status = 'collected'
+
         elif new_status == 'delivery_initiated':
             pass
+
         elif new_status == 'delivery_confirmed':
             mission.delivery_time = now
             if notes:
                 mission.delivery_notes = notes
-            # Automatically calculate and commit ImpactRecord upon verified delivery!
             cls._record_impact(mission)
             if mission.donation:
                 mission.donation.status = 'delivered'
+
         elif new_status == 'completed':
             if not mission.delivery_time:
                 mission.delivery_time = now
@@ -129,6 +222,7 @@ class MissionService:
                 mission.donation.status = 'completed'
             if mission.courier_volunteer:
                 mission.courier_volunteer.available = True
+
         elif new_status == 'cancelled':
             mission.cancellation_reason = notes or "Cancelled by operator"
             if mission.courier_volunteer:
@@ -139,7 +233,6 @@ class MissionService:
         mission.status = new_status
         mission.updated_at = now
 
-        # Audit log
         audit = AuditLog(
             user_id=actor_user.id if actor_user else None,
             action=f"MISSION_TRANSITION_{new_status.upper()}",
@@ -149,7 +242,6 @@ class MissionService:
         )
         db.session.add(audit)
 
-        # Notify stakeholders
         cls._notify_mission_update(mission, current, new_status)
 
         db.session.commit()
@@ -166,26 +258,43 @@ class MissionService:
         if not donation:
             return None
 
-        # Standard conversion: 1 packet/meal ≈ 0.45 kg
-        if donation.unit == 'kg':
+        d_cat = (donation.donation_category or "prepared_food").lower()
+
+        # Category-Specific Mass (kg) Calculations
+        unit_lower = (donation.unit or "").lower()
+        if unit_lower == 'kg':
             kg = float(donation.quantity)
-        elif donation.unit in ['liters', 'l']:
+        elif unit_lower in ['liters', 'l']:
             kg = float(donation.quantity) * 1.0
+        elif unit_lower in ['sacks', 'bags'] and d_cat == 'raw_ingredients':
+            kg = float(donation.quantity) * 25.0  # Standard 25kg bulk grain sack
+        elif unit_lower in ['crates', 'boxes'] and d_cat == 'fresh_produce':
+            kg = float(donation.quantity) * 15.0  # Standard 15kg produce crate
+        elif unit_lower in ['trays'] and d_cat == 'prepared_food':
+            kg = float(donation.quantity) * 3.5  # Standard catering tray
         else:
             kg = float(donation.quantity) * 0.45
 
-        meals = int(kg / 0.4) if kg > 0 else donation.quantity
+        # Meal Equivalents by category
+        if d_cat == "prepared_food":
+            meals = int(kg / 0.40) if kg > 0 else donation.quantity
+        elif d_cat == "raw_ingredients":
+            # 1 kg raw grain / pulses yields ~2.5 cooked meal portions
+            meals = int(kg * 2.5)
+        else:
+            # 1 kg fresh produce yields ~2 servings
+            meals = int(kg * 2.0)
+
         beneficiaries = min(meals, mission.destination_ngo.capacity_people or meals)
 
         # Environmental estimates (Food and Agriculture Organization / UNEP benchmarks)
-        # Average ~2.5 kg CO2e saved per kg food rescued from landfill
-        # Average ~250 Liters of water saved embedded in agricultural production per kg
         co2_saved = round(kg * 2.5, 2)
         water_saved = round(kg * 250.0, 1)
 
         impact = ImpactRecord(
             mission_id=mission.id,
             donation_id=donation.id,
+            donation_category=d_cat,
             quantity_kg=round(kg, 2),
             meals_served=meals,
             beneficiaries_reached=beneficiaries,

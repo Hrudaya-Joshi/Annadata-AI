@@ -74,16 +74,24 @@ class CoordinationAgent(BaseAgent):
             if not mission:
                 mission = MissionService.create_mission_for_request(donation, ngo, volunteer)
 
+            d_cat = (donation.donation_category or "prepared_food").lower()
+            if d_cat == "fresh_produce":
+                cat_instruction = "Use ventilated crates; protect delicate produce from direct sun and crushing."
+            elif d_cat == "raw_ingredients":
+                cat_instruction = "Keep cargo completely dry and covered; inspect bag seams on pickup."
+            else:
+                cat_instruction = "Maintain active thermal holding chain (>60°C); deliver without intermediate stops."
+
             prompt = (
                 f"Suggest pickup arrangements for {donation.quantity} {donation.unit} of "
-                f"{donation.food_name} from {donation.location_address} to {ngo.organization_name}. "
-                f"Distance: {distance} km."
+                f"{d_cat.replace('_', ' ')} '{donation.food_name}' from {donation.location_address} to {ngo.organization_name}. "
+                f"Distance: {distance} km. Handling: {cat_instruction}"
             )
             suggestion = self.llm.generate(prompt, max_tokens=150)
             if not suggestion:
                 suggestion = (
                     f"Optimal route: Transit ~{int(distance * 3 + 8)} mins. "
-                    f"Inspect food packaging on arrival and confirm pickup via Food Rescue Passport."
+                    f"{cat_instruction} Confirm handover with Food Rescue Passport."
                 )
 
             donation.status = "matched"

@@ -1,143 +1,234 @@
 {% extends "base.html" %}
-{% block title %}Register — ANNADATA AI{% endblock %}
+{% block title %}Join the Food Rescue Network — ANNADATA AI{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-4 py-lg-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card-premium p-4 p-md-5">
-                <div class="text-center mb-4">
-                    <div style="width: 44px; height: 44px; border-radius: 10px; background: var(--secondary); display: inline-flex; align-items: center; justify-content: center; color: white; margin-bottom: 0.75rem;">
-                        <i data-lucide="user-plus" style="width: 24px; height: 24px;"></i>
-                    </div>
-                    <h3 class="fw-bold mb-1">Join ANNADATA AI</h3>
-                    <p class="text-muted small">Select your role to connect with the food rescue network</p>
-                </div>
+        <div class="col-xl-10 col-lg-11">
+            <div class="card-premium p-0 overflow-hidden shadow-lg border-2 border-warm" style="background: var(--surface-white); border-radius: var(--radius-lg);">
+                <div class="row g-0">
+                    <!-- Left Column: Mission Pillar Narrative & Live Network Stats -->
+                    <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-between p-4 p-xl-5 text-white position-relative" style="background: linear-gradient(135deg, rgba(25, 54, 39, 0.95), rgba(36, 76, 56, 0.9)), url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=900&q=80') center/cover no-repeat;">
+                        <div>
+                            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-4" style="background: rgba(255, 245, 230, 0.15); border: 1px solid rgba(242, 181, 68, 0.4); backdrop-filter: blur(8px);">
+                                <i data-lucide="shield-check" class="text-harvest" style="width: 15px; height: 15px;"></i>
+                                <span class="small fw-semibold text-cream">Verified Community Network</span>
+                            </div>
 
-                <form method="POST" action="{{ url_for('auth.register') }}" id="regForm">
-                    <!-- Role Selection -->
-                    <div class="mb-4">
-                        <label class="form-label small fw-semibold text-dark">I want to join as a:</label>
-                        <div class="row g-2">
-                            <div class="col-4">
-                                <input type="radio" class="btn-check" name="role" id="roleRest" value="restaurant" autocomplete="off" checked onchange="toggleRoleFields('restaurant')">
-                                <label class="btn btn-outline-forest w-100 py-2 small d-flex flex-column align-items-center" for="roleRest">
-                                    <i data-lucide="utensils" class="mb-1" style="width: 18px; height: 18px;"></i>
-                                    <span>Restaurant</span>
-                                </label>
-                            </div>
-                            <div class="col-4">
-                                <input type="radio" class="btn-check" name="role" id="roleNgo" value="ngo" autocomplete="off" onchange="toggleRoleFields('ngo')">
-                                <label class="btn btn-outline-forest w-100 py-2 small d-flex flex-column align-items-center" for="roleNgo">
-                                    <i data-lucide="heart" class="mb-1" style="width: 18px; height: 18px;"></i>
-                                    <span>NGO</span>
-                                </label>
-                            </div>
-                            <div class="col-4">
-                                <input type="radio" class="btn-check" name="role" id="roleVol" value="volunteer" autocomplete="off" onchange="toggleRoleFields('volunteer')">
-                                <label class="btn btn-outline-forest w-100 py-2 small d-flex flex-column align-items-center" for="roleVol">
-                                    <i data-lucide="bike" class="mb-1" style="width: 18px; height: 18px;"></i>
-                                    <span>Volunteer</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                            <h2 class="display-6 fw-bold text-white mb-3" style="letter-spacing: -0.02em;">
+                                Choose Your Role in <span style="color: var(--harvest-yellow);">Food Rescue.</span>
+                            </h2>
+                            <p class="small text-cream mb-4" style="line-height: 1.65; opacity: 0.92;">
+                                Whether donating surplus banquet meals, running a community shelter, or donating one hour to courier food, your participation prevents edible food from rotting in landfills.
+                            </p>
 
-                    <!-- Common Credentials -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Contact Full Name</label>
-                            <input type="text" name="full_name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+                            <div class="d-flex flex-column gap-3 mb-4">
+                                <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                    <div style="font-size: 1.4rem;">🍲</div>
+                                    <div>
+                                        <div class="fw-bold small text-white">Commercial Food Donors</div>
+                                        <div class="text-cream" style="font-size: 0.72rem; opacity: 0.85;">Restaurants, bakeries, caterers, and wholesale distributors logging surplus with GPS auto-detection.</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                    <div style="font-size: 1.4rem;">🏡</div>
+                                    <div>
+                                        <div class="fw-bold small text-white">Grassroots Relief NGOs</div>
+                                        <div class="text-cream" style="font-size: 0.72rem; opacity: 0.85;">Shelters, orphanages, and community kitchens receiving smart-matched compatible food batches.</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                    <div style="font-size: 1.4rem;">🚲</div>
+                                    <div>
+                                        <div class="fw-bold small text-white">Volunteer Courier Fleet</div>
+                                        <div class="text-cream" style="font-size: 0.72rem; opacity: 0.85;">Neighborhood couriers claiming local pickups and verifying handovers with cryptographic PINs.</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Email Address</label>
-                            <input type="email" name="email" class="form-control" placeholder="contact@example.com" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Phone Number</label>
-                            <input type="tel" name="phone" class="form-control" placeholder="+91 98765 43210" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold">Password</label>
-                            <input type="password" name="password" class="form-control" placeholder="At least 6 characters" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small fw-semibold">Confirm Password</label>
-                            <input type="password" name="confirm_password" class="form-control" placeholder="Repeat password" required>
+
+                        <div class="pt-3 border-top border-secondary border-opacity-25 small text-cream">
+                            <i data-lucide="lock" class="me-1 text-harvest" style="width: 14px; height: 14px;"></i>
+                            Data protected under deterministic food safety governance and role isolation.
                         </div>
                     </div>
 
-                    <!-- Role-Specific Fields Container -->
-                    <div id="restaurantFields" class="p-3 bg-light rounded border mb-3">
-                        <h6 class="fw-bold small text-primary mb-3"><i data-lucide="utensils" class="me-1" style="width: 14px; height: 14px;"></i> Restaurant & Kitchen Details</h6>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Business Name</label>
-                            <input type="text" name="business_name" class="form-control form-control-sm" placeholder="e.g. Spice Route Bistro">
+                    <!-- Right Column: Registration Form with Modern Role Tabs & GPS Detection -->
+                    <div class="col-lg-7 p-4 p-md-5" style="background: var(--surface-cream);">
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge badge-soft badge-fresh">Registration</span>
+                                <span class="text-muted small">&bull; Join the Rescue Mission</span>
+                            </div>
+                            <h3 class="fw-bold text-forest mb-1">Create Your Account</h3>
+                            <p class="text-muted small mb-0">Select your operational profile and enter your basic details</p>
                         </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Cuisine / Food Type</label>
-                                <input type="text" name="food_type" class="form-control form-control-sm" placeholder="e.g. North Indian / Buffet">
+
+                        <form method="POST" action="{{ url_for('auth.register') }}" id="regForm">
+                            <!-- Role Switcher Segmented Control -->
+                            <div class="mb-4">
+                                <label class="form-label small fw-bold text-forest mb-2">Select Your Role *</label>
+                                <div class="row g-2">
+                                    <div class="col-4">
+                                        <input type="radio" class="btn-check" name="role" id="roleRest" value="restaurant" checked onchange="toggleRoleFields('restaurant')">
+                                        <label class="btn btn-outline-forest w-100 p-2 text-center" for="roleRest">
+                                            <div style="font-size: 1.25rem;">🍲</div>
+                                            <div class="fw-bold" style="font-size: 0.78rem;">Donor</div>
+                                        </label>
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="radio" class="btn-check" name="role" id="roleNgo" value="ngo" onchange="toggleRoleFields('ngo')">
+                                        <label class="btn btn-outline-forest w-100 p-2 text-center" for="roleNgo">
+                                            <div style="font-size: 1.25rem;">🏡</div>
+                                            <div class="fw-bold" style="font-size: 0.78rem;">NGO</div>
+                                        </label>
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="radio" class="btn-check" name="role" id="roleVol" value="volunteer" onchange="toggleRoleFields('volunteer')">
+                                        <label class="btn btn-outline-forest w-100 p-2 text-center" for="roleVol">
+                                            <div style="font-size: 1.25rem;">🚲</div>
+                                            <div class="fw-bold" style="font-size: 0.78rem;">Volunteer</div>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Address / Area</label>
-                                <input type="text" name="location_address" class="form-control form-control-sm" placeholder="e.g. Koramangala 4th Block, Bengaluru">
+
+                            <!-- Primary Account Info -->
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Full Name / Contact Person *</label>
+                                    <input type="text" name="full_name" class="form-control" placeholder="e.g. Chef Sanjeev Rao" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Phone Number *</label>
+                                    <input type="tel" name="phone" class="form-control" placeholder="+91 98450 12345" required>
+                                </div>
                             </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-forest">Email Address *</label>
+                                <input type="email" name="email" class="form-control" placeholder="name@organization.org" required>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Password (min 6 chars) *</label>
+                                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Confirm Password *</label>
+                                    <input type="password" name="confirm_password" class="form-control" placeholder="••••••••" required>
+                                </div>
+                            </div>
+
+                            <!-- Role-Specific Fields Container -->
+                            <!-- RESTAURANT ROLE FIELDS -->
+                            <div id="restaurantFields" class="p-3 rounded-3 border border-warm mb-3" style="background: #FFFFFF;">
+                                <h6 class="fw-bold small text-forest mb-2 d-flex align-items-center gap-1">
+                                    <i data-lucide="utensils" class="text-forest" style="width: 14px; height: 14px;"></i> Donor & Commercial Kitchen Details
+                                </h6>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold text-forest">Business / Kitchen Name</label>
+                                    <input type="text" name="business_name" class="form-control form-control-sm" placeholder="e.g. Golden Spoon Banquet & Bistro">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold text-forest">Surplus Food Stream</label>
+                                    <input type="text" name="food_type" class="form-control form-control-sm" placeholder="e.g. North Indian Banquets, Farm Produce, Staples">
+                                </div>
+                                <div class="mb-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label small fw-semibold text-forest mb-0">Kitchen Location Address *</label>
+                                        <button type="button" class="gps-detect-btn py-1 px-2" id="btnDetectRestReg" onclick="window.annadataGeo.detectLocation({addressInputId:'restRegAddress', latInputId:'geoLat', lngInputId:'geoLng', statusId:'geoStatusRestReg', buttonId:'btnDetectRestReg'})">
+                                            <i data-lucide="crosshair" style="width:13px;height:13px;"></i> Use My Current Location
+                                        </button>
+                                    </div>
+                                    <input type="text" name="location_address" id="restRegAddress" class="form-control form-control-sm" placeholder="e.g. 123 100-Ft Road, Indiranagar, Bengaluru">
+                                    <div id="geoStatusRestReg" class="mt-2"></div>
+                                </div>
+                            </div>
+
+                            <!-- NGO ROLE FIELDS -->
+                            <div id="ngoFields" class="p-3 rounded-3 border border-warm mb-3" style="display: none; background: #FFFFFF;">
+                                <h6 class="fw-bold small text-forest mb-2 d-flex align-items-center gap-1">
+                                    <i data-lucide="heart" class="text-leaf" style="width: 14px; height: 14px;"></i> NGO & Community Shelter Details
+                                </h6>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold text-forest">Shelter Organization Name</label>
+                                    <input type="text" name="organization_name" class="form-control form-control-sm" placeholder="e.g. Helping Hands Community Shelter">
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold text-forest">Beneficiary Capacity (Servings)</label>
+                                        <input type="number" name="capacity_people" class="form-control form-control-sm" value="50" min="5">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold text-forest">Registration / Trust Number</label>
+                                        <input type="text" name="registration_number" class="form-control form-control-sm" placeholder="NGO-BLR-2026-01">
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold text-forest">Accepted Food Categories</label>
+                                    <input type="text" name="food_preferences" class="form-control form-control-sm" value="prepared_food,fresh_produce,raw_ingredients">
+                                </div>
+                                <div class="mb-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label small fw-semibold text-forest mb-0">Shelter Facility Address *</label>
+                                        <button type="button" class="gps-detect-btn py-1 px-2" id="btnDetectNgoReg" onclick="window.annadataGeo.detectLocation({addressInputId:'ngoRegAddress', latInputId:'geoLat', lngInputId:'geoLng', statusId:'geoStatusNgoReg', buttonId:'btnDetectNgoReg'})">
+                                            <i data-lucide="crosshair" style="width:13px;height:13px;"></i> Use My Current Location
+                                        </button>
+                                    </div>
+                                    <input type="text" name="location_address" id="ngoRegAddress" class="form-control form-control-sm" placeholder="e.g. Austin Town, Neelasandra, Bengaluru">
+                                    <div id="geoStatusNgoReg" class="mt-2"></div>
+                                </div>
+                            </div>
+
+                            <!-- VOLUNTEER ROLE FIELDS -->
+                            <div id="volunteerFields" class="p-3 rounded-3 border border-warm mb-3" style="display: none; background: #FFFFFF;">
+                                <h6 class="fw-bold small text-forest mb-2 d-flex align-items-center gap-1">
+                                    <i data-lucide="bike" class="text-terracotta" style="width: 14px; height: 14px;"></i> Courier Volunteer Dispatch Details
+                                </h6>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold text-forest">Transport Vehicle</label>
+                                        <select name="vehicle_type" class="form-select form-select-sm">
+                                            <option value="bike">Motorcycle / Scooter with Insulated Box</option>
+                                            <option value="bicycle">Bicycle with Carrier Bag</option>
+                                            <option value="car">Car / Delivery Van</option>
+                                            <option value="walk">Pedestrian Local Courier</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold text-forest">Max Operating Radius (km)</label>
+                                        <input type="number" name="max_distance_km" class="form-control form-control-sm" value="12" min="1">
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label small fw-semibold text-forest mb-0">Base Neighborhood / Sector *</label>
+                                        <button type="button" class="gps-detect-btn py-1 px-2" id="btnDetectVolReg" onclick="window.annadataGeo.detectLocation({addressInputId:'volRegAddress', latInputId:'geoLat', lngInputId:'geoLng', statusId:'geoStatusVolReg', buttonId:'btnDetectVolReg'})">
+                                            <i data-lucide="crosshair" style="width:13px;height:13px;"></i> Use My Current Location
+                                        </button>
+                                    </div>
+                                    <input type="text" name="location_address" id="volRegAddress" class="form-control form-control-sm" placeholder="e.g. Koramangala, Bengaluru">
+                                    <div id="geoStatusVolReg" class="mt-2"></div>
+                                </div>
+                            </div>
+
+                            <!-- Internal coordinates hidden from user view -->
+                            <input type="hidden" name="latitude" id="geoLat" value="12.9716">
+                            <input type="hidden" name="longitude" id="geoLng" value="77.5946">
+
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-forest py-2 fw-bold shadow-sm">
+                                    <i data-lucide="user-plus" class="me-1" style="width: 16px; height: 16px;"></i> Complete Registration
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-3 small text-muted">
+                            Already registered? <a href="{{ url_for('auth.login') }}" class="text-forest fw-bold text-decoration-none">Sign in here &rarr;</a>
                         </div>
                     </div>
-
-                    <div id="ngoFields" class="p-3 bg-light rounded border mb-3" style="display: none;">
-                        <h6 class="fw-bold small text-danger mb-3"><i data-lucide="heart" class="me-1" style="width: 14px; height: 14px;"></i> NGO & Shelter Details</h6>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold">Organization Name</label>
-                            <input type="text" name="organization_name" class="form-control form-control-sm" placeholder="e.g. Hope Community Kitchen">
-                        </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Beneficiary Capacity (People)</label>
-                                <input type="number" name="capacity_people" class="form-control form-control-sm" value="50" min="5">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Registration Number</label>
-                                <input type="text" name="registration_number" class="form-control form-control-sm" placeholder="NGO/REG/2026/01">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label small fw-semibold">Food Preferences (comma-separated)</label>
-                                <input type="text" name="food_preferences" class="form-control form-control-sm" value="vegetarian, cooked meals, fruits, baked goods">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="volunteerFields" class="p-3 bg-light rounded border mb-3" style="display: none;">
-                        <h6 class="fw-bold small text-primary mb-3"><i data-lucide="bike" class="me-1" style="width: 14px; height: 14px;"></i> Volunteer Courier Logistics</h6>
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Vehicle Type</label>
-                                <select name="vehicle_type" class="form-select form-select-sm">
-                                    <option value="bike">Motorcycle / Scooter</option>
-                                    <option value="bicycle">Bicycle</option>
-                                    <option value="car">Car / Van</option>
-                                    <option value="walk">Pedestrian</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Max Travel Radius (km)</label>
-                                <input type="number" name="max_distance_km" class="form-control form-control-sm" value="12" min="1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hidden lat / long defaults -->
-                    <input type="hidden" name="latitude" id="geoLat" value="12.9716">
-                    <input type="hidden" name="longitude" id="geoLng" value="77.5946">
-
-                    <div class="d-grid mb-3">
-                        <button type="submit" class="btn btn-forest py-2">Create Account</button>
-                    </div>
-                </form>
-
-                <div class="text-center mt-3 small text-muted">
-                    Already registered? <a href="{{ url_for('auth.login') }}" class="text-primary fw-semibold">Sign in here</a>
                 </div>
             </div>
         </div>
@@ -151,7 +242,6 @@ function toggleRoleFields(role) {
     document.getElementById('volunteerFields').style.display = (role === 'volunteer') ? 'block' : 'none';
 }
 
-// Check URL param ?role=
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const r = params.get('role');
@@ -161,14 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (r === 'volunteer') {
         document.getElementById('roleVol').checked = true;
         toggleRoleFields('volunteer');
-    }
-
-    // Try HTML5 Geolocation with permission
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
-            document.getElementById('geoLat').value = pos.coords.latitude;
-            document.getElementById('geoLng').value = pos.coords.longitude;
-        }, () => {});
     }
 });
 </script>

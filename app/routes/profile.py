@@ -19,6 +19,9 @@ def index():
         current_user.phone = phone
 
         # Role specific updates
+        lat = request.form.get('latitude')
+        lng = request.form.get('longitude')
+
         if current_user.role == 'restaurant' and current_user.restaurant:
             b_name = request.form.get('business_name', '').strip()
             f_type = request.form.get('food_type', '').strip()
@@ -29,6 +32,12 @@ def index():
                 current_user.restaurant.food_type = f_type
             if addr:
                 current_user.restaurant.location_address = addr
+            if lat and lng:
+                try:
+                    current_user.restaurant.latitude = float(lat)
+                    current_user.restaurant.longitude = float(lng)
+                except ValueError:
+                    pass
 
         elif current_user.role == 'ngo' and current_user.ngo:
             org_name = request.form.get('organization_name', '').strip()
@@ -43,6 +52,12 @@ def index():
                 current_user.ngo.food_preferences = prefs
             if addr:
                 current_user.ngo.location_address = addr
+            if lat and lng:
+                try:
+                    current_user.ngo.latitude = float(lat)
+                    current_user.ngo.longitude = float(lng)
+                except ValueError:
+                    pass
 
         elif current_user.role == 'volunteer' and current_user.volunteer:
             v_type = request.form.get('vehicle_type', '').strip()
@@ -51,6 +66,12 @@ def index():
                 current_user.volunteer.vehicle_type = v_type
             if max_dist:
                 current_user.volunteer.max_distance_km = float(max_dist)
+            if lat and lng:
+                try:
+                    current_user.volunteer.latitude = float(lat)
+                    current_user.volunteer.longitude = float(lng)
+                except ValueError:
+                    pass
 
         audit = AuditLog(
             user_id=current_user.id,

@@ -85,33 +85,72 @@ def transition_mission(mission_id):
     new_status = request.form.get('new_status', '').strip()
     notes = request.form.get('notes', '').strip()
 
-    # Role permission checks on state changes
-    # Volunteers can trigger: pickup_initiated, food_collected, delivery_initiated
-    # NGOs can trigger: delivery_confirmed, completed
-    # Admins can trigger any valid transition
-    authorized = False
-    if current_user.role == 'admin':
-        authorized = True
-    elif current_user.role == 'volunteer' and mission.volunteer_id == current_user.volunteer.id:
-        if new_status in ['pickup_initiated', 'food_collected', 'delivery_initiated']:
-            authorized = True
-    elif current_user.role == 'ngo' and mission.ngo_id == current_user.ngo.id:
-        if new_status in ['delivery_confirmed', 'completed', 'cancelled']:
-            authorized = True
-    elif current_user.role == 'restaurant' and mission.donation and mission.donation.restaurant_id == current_user.restaurant.id:
-        if new_status == 'cancelled':
-            authorized = True
-
-    if not authorized:
-        flash('You are not authorized to transition this mission to the selected state.', 'danger')
+    # PIN wale status sirf dedicated verification routes se badlenge.
+    if new_status in ['food_collected', 'delivery_confirmed']:
+        flash('Is kaam ke liye PIN verification zaroori hai.', 'danger')
         return redirect(url_for('missions.mission_detail', mission_id=mission.id))
 
-    success, msg = MissionService.transition_state(mission, new_status, current_user, notes)
-    if success:
-        flash(msg, 'success')
-    else:
-        flash(msg, 'danger')
+    authorized = False
 
+    if current_user.role == 'admin':
+        authorized = True
+
+    elif current_user.role == 'volunteer':
+        volunteer = current_user.volunteer
+        if volunteer and mission.volunteer_id == volunteer.id:
+            if new_status in ['pickup_initiated', 'delivery_initiated']:
+                authorized = True
+
+    elif current_user.role == 'ngo':
+        ngo = current_user.ngo
+        if ngo and mission.ngo_id == ngo.id:
+            if new_status in ['completed', 'cancelled']:
+                authorized = True
+
+    elif current_user.role == 'restaurant':
+        restaurant = current_user.restaurant
+        if restaurant and mission.donation and mission.donation.restaurant_id == restaurant.id:
+            if new_status == 'cancelled':
+                authorized = True
+
+    if not authorized:
+        flash('You are not authorized to make this change.', 'danger')
+        return redirect(url_for('missions.mission_detail', mission_id=mission.id))
+
+    success, msg = MissionService.transition_state(
+        mission, new_status, current_user, notes
+    )
+
+    flash(msg, 'success' if success else 'danger')
+    return redirect(url_for('missions.mission_detail', mission_id=mission.id))
+
+
+@missions_bp.route('/mission/<int:mission_id>/verify-pickup', methods=['POST'])
+@login_required
+def verify_pickup_pin(mission_id):
+    mission = RescueMission.query.get_or_404(mission_id)
+
+    volunteer = current_user.volunteer if current_user.role == 'volunteer' else None
+
+    if not volunteer or mission.volunteer_id != volunteer.id:
+        flash('Sirf assigned volunteer PIN verify kar sakta hai.', 'danger')
+        return redirect(url_for('missions.mission_detail', mission_id=mission.id))
+
+    if mission.status != 'pickup_initiated':
+        flash('Pickup PIN is stage par verify nahi ho sakta.', 'danger')
+        return redirect(url_for('missions.mission_detail', mission_id=mission.id))
+
+    pin_entered = request.form.get('pin', '').strip()
+
+    success, msg = MissionService.transition_state(
+        mission,
+        'food_collected',
+        current_user,
+        'Kitchen Collection PIN verified.',
+        pin=pin_entered
+    )
+
+    flash(msg, 'success' if success else 'danger')
     return redirect(url_for('missions.mission_detail', mission_id=mission.id))
 
 
@@ -120,22 +159,28 @@ def transition_mission(mission_id):
 def verify_delivery_pin(mission_id):
     mission = RescueMission.query.get_or_404(mission_id)
 
-    if current_user.role not in ['ngo', 'admin']:
-        flash('Only destination NGO or administrators can verify delivery.', 'danger')
+    volunteer = current_user.volunteer if current_user.role == 'volunteer' else None
+
+    if not volunteer or mission.volunteer_id != volunteer.id:
+        flash('Sirf assigned volunteer PIN verify kar sakta hai.', 'danger')
+        return redirect(url_for('missions.mission_detail', mission_id=mission.id))
+
+    if mission.status != 'delivery_initiated':
+        flash('Delivery PIN is stage par verify nahi ho sakta.', 'danger')
         return redirect(url_for('missions.mission_detail', mission_id=mission.id))
 
     pin_entered = request.form.get('pin', '').strip()
     notes = request.form.get('notes', '').strip()
 
-    if not mission.verification_pin or pin_entered == mission.verification_pin or current_user.role == 'admin':
-        success, msg = MissionService.transition_state(mission, 'delivery_confirmed', current_user, f"PIN Verified. Notes: {notes}")
-        if success:
-            flash('Delivery successfully verified and impact confirmed!', 'success')
-        else:
-            flash(msg, 'danger')
-    else:
-        flash('Invalid verification PIN. Please request the PIN from the volunteer courier.', 'danger')
+    success, msg = MissionService.transition_state(
+        mission,
+        'delivery_confirmed',
+        current_user,
+        f'Shelter Delivery PIN verified. Notes: {notes}',
+        pin=pin_entered
+    )
 
+    flash(msg, 'success' if success else 'danger')
     return redirect(url_for('missions.mission_detail', mission_id=mission.id))
 
 

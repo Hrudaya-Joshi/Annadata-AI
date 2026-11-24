@@ -5,9 +5,60 @@ from app.agents.food_analysis_agent import FoodAnalysisAgent
 from app.agents.ngo_matching_agent import NGOMatchingAgent
 from app.agents.coordination_agent import CoordinationAgent
 from app.services.emergency_service import EmergencyRescueService
+from app.tools.geo_tools import reverse_geocode, forward_geocode
 from datetime import datetime
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+
+@api_bp.route('/geo/reverse', methods=['GET', 'POST'])
+def api_reverse_geocode():
+    """Convert browser coordinates (lat, lon) to human-readable address."""
+    if request.method == 'POST':
+        data = request.get_json() or {}
+        lat = data.get('latitude') or data.get('lat')
+        lon = data.get('longitude') or data.get('lon') or data.get('lng')
+    else:
+        lat = request.args.get('lat') or request.args.get('latitude')
+        lon = request.args.get('lon') or request.args.get('lng') or request.args.get('longitude')
+
+    if lat is None or lon is None:
+        return jsonify({"error": "Latitude and longitude required"}), 400
+
+    try:
+        address = reverse_geocode(lat, lon)
+        return jsonify({
+            "status": "success",
+            "latitude": float(lat),
+            "longitude": float(lon),
+            "address": address
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
+@api_bp.route('/geo/forward', methods=['GET', 'POST'])
+def api_forward_geocode():
+    """Convert human-readable address to (latitude, longitude)."""
+    if request.method == 'POST':
+        data = request.get_json() or {}
+        address = data.get('address') or ''
+    else:
+        address = request.args.get('address') or ''
+
+    if not address.strip():
+        return jsonify({"error": "Address string required"}), 400
+
+    try:
+        lat, lon = forward_geocode(address)
+        return jsonify({
+            "status": "success",
+            "address": address,
+            "latitude": lat,
+            "longitude": lon
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 
 @api_bp.route('/donate', methods=['POST'])

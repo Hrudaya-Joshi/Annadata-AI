@@ -53,6 +53,8 @@ class NGO(db.Model):
     organization_name = db.Column(db.String(120), nullable=False)
     registration_number = db.Column(db.String(50), nullable=True)
     food_preferences = db.Column(db.String(200), nullable=True)
+    accepted_categories = db.Column(db.String(200), default='prepared_food,fresh_produce,raw_ingredients')  # Supported donation categories
+    storage_facilities = db.Column(db.String(200), default='dining_hall,cold_storage,dry_pantry')  # 'dry_pantry', 'cold_storage', 'dining_hall', 'freezer'
     capacity_people = db.Column(db.Integer, nullable=False, default=0)
     location_address = db.Column(db.String(200), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
@@ -87,13 +89,14 @@ class FoodDonation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     rescue_code = db.Column(db.String(36), unique=True, nullable=True, index=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=False)
+    donation_category = db.Column(db.String(40), default='prepared_food', nullable=True)  # 'prepared_food', 'fresh_produce', 'raw_ingredients'
     food_name = db.Column(db.String(120), nullable=False)
-    category = db.Column(db.String(50), nullable=False)
+    category = db.Column(db.String(50), nullable=False)  # Subcategory / food type
     quantity = db.Column(db.Integer, nullable=False)
     unit = db.Column(db.String(20), nullable=False, default='packets')
-    preparation_time = db.Column(db.DateTime, nullable=False)
-    expiry_time = db.Column(db.DateTime, nullable=False)
-    collection_deadline = db.Column(db.DateTime, nullable=False)
+    preparation_time = db.Column(db.DateTime, nullable=True)  # Prepared food: prep time; Produce: harvest/procure date
+    expiry_time = db.Column(db.DateTime, nullable=False)  # Expiry or best-before
+    collection_deadline = db.Column(db.DateTime, nullable=False)  # Available until
     description = db.Column(db.Text, nullable=True)
     location_address = db.Column(db.String(200), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
@@ -105,6 +108,17 @@ class FoodDonation(db.Model):
     storage_temperature = db.Column(db.String(50), nullable=True)
     dietary_flags = db.Column(db.String(100), nullable=True)
     packaging_type = db.Column(db.String(50), nullable=True)
+
+    # Category-Specific Attributes
+    produce_type = db.Column(db.String(80), nullable=True)  # e.g., 'Leafy Greens', 'Root Vegetables', 'Orchard Fruits'
+    freshness_condition = db.Column(db.String(80), nullable=True)  # e.g., 'Freshly Harvested', 'Market Surplus', 'Ripe / Use Within 48h'
+    harvest_date = db.Column(db.DateTime, nullable=True)
+    ingredient_name = db.Column(db.String(120), nullable=True)  # e.g., 'Basmati Rice', 'Toor Dal', 'Wheat Flour'
+    packaging_condition = db.Column(db.String(80), nullable=True)  # e.g., 'Factory Sealed', 'Bulk Jute Sack', 'Airtight Container'
+    storage_requirements = db.Column(db.String(120), nullable=True)  # e.g., 'Dry Pantry', 'Moisture-Protected', 'Cool Aerated'
+    image_url = db.Column(db.String(255), nullable=True)
+    requires_human_verification = db.Column(db.Boolean, default=False)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -126,6 +140,9 @@ class FoodSafetyAssessment(db.Model):
     temperature_celsius = db.Column(db.Float, nullable=True)
     risk_level = db.Column(db.String(20), default='low')  # 'low', 'medium', 'high', 'critical'
     ai_risk_observations = db.Column(db.Text, nullable=True)
+    requires_human_verification = db.Column(db.Boolean, default=False)
+    category_checks = db.Column(db.Text, nullable=True)  # JSON-encoded category-specific checks
+    safety_recommendations = db.Column(db.Text, nullable=True)
     verified_by_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     verified_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -192,6 +209,7 @@ class RescueMission(db.Model):
     pickup_time = db.Column(db.DateTime, nullable=True)
     delivery_time = db.Column(db.DateTime, nullable=True)
     verification_pin = db.Column(db.String(10), nullable=True)
+    pickup_pin = db.Column(db.String(10), nullable=True)
     delivery_notes = db.Column(db.Text, nullable=True)
     cancellation_reason = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -205,6 +223,7 @@ class BeneficiaryDemand(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     ngo_id = db.Column(db.Integer, db.ForeignKey('ngos.id'), nullable=False)
+    donation_category = db.Column(db.String(40), default='prepared_food', nullable=True)  # 'prepared_food', 'fresh_produce', 'raw_ingredients'
     category = db.Column(db.String(50), nullable=False)
     required_quantity = db.Column(db.Integer, nullable=False)
     unit = db.Column(db.String(20), default='meals')
@@ -261,6 +280,7 @@ class ImpactRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     mission_id = db.Column(db.Integer, db.ForeignKey('rescue_missions.id'), unique=True, nullable=False)
     donation_id = db.Column(db.Integer, db.ForeignKey('food_donations.id'), nullable=False)
+    donation_category = db.Column(db.String(40), default='prepared_food', nullable=True)  # 'prepared_food', 'fresh_produce', 'raw_ingredients'
     quantity_kg = db.Column(db.Float, nullable=False)
     meals_served = db.Column(db.Integer, nullable=False)
     beneficiaries_reached = db.Column(db.Integer, nullable=False)

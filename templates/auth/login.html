@@ -2,52 +2,152 @@
 {% block title %}Sign In — ANNADATA AI{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-4 py-lg-5">
     <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-5">
-            <div class="card-premium p-4 p-md-5">
-                <div class="text-center mb-4">
-                    <div style="width: 44px; height: 44px; border-radius: 10px; background: var(--primary); display: inline-flex; align-items: center; justify-content: center; color: var(--accent); margin-bottom: 0.75rem;">
-                        <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
-                    </div>
-                    <h3 class="fw-bold mb-1">Welcome Back</h3>
-                    <p class="text-muted small">Sign in to your ANNADATA AI portal</p>
-                </div>
+        <div class="col-xl-10 col-lg-11">
+            <div class="card-premium p-0 overflow-hidden shadow-lg border-2 border-warm" style="background: var(--surface-white); border-radius: var(--radius-lg);">
+                <div class="row g-0">
+                    <!-- Left Column: Inspiring Photography, Branding & Impact Stats -->
+                    <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-between p-4 p-xl-5 text-white position-relative" style="background: linear-gradient(135deg, rgba(25, 54, 39, 0.95), rgba(36, 76, 56, 0.88)), url('https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=900&q=80') center/cover no-repeat;">
+                        <!-- Top Brand Pill -->
+                        <div>
+                            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-4" style="background: rgba(255, 245, 230, 0.15); border: 1px solid rgba(242, 181, 68, 0.4); backdrop-filter: blur(8px);">
+                                <i data-lucide="sprout" class="text-harvest" style="width: 15px; height: 15px;"></i>
+                                <span class="small fw-semibold text-cream">ANNADATA AI &bull; Social Impact Net</span>
+                            </div>
 
-                <form method="POST" action="{{ url_for('auth.login') }}">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Email Address</label>
-                        <input type="email" name="email" id="loginEmail" class="form-control" placeholder="name@organization.org" required>
-                    </div>
+                            <h2 class="display-6 fw-bold text-white mb-3" style="letter-spacing: -0.02em;">
+                                Turn Food Surplus Into <span style="color: var(--harvest-yellow);">Living Dignity.</span>
+                            </h2>
+                            <p class="small text-cream mb-4" style="line-height: 1.65; opacity: 0.92;">
+                                Connect your commercial kitchen, hunger relief shelter, or volunteer transit capacity with autonomous AI allocation, temperature verification, and transparent QR passports.
+                            </p>
 
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label small fw-semibold mb-0">Password</label>
+                            <!-- Three Donation Category Indicators -->
+                            <div class="d-flex flex-column gap-2 mb-4">
+                                <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                    <span style="font-size: 1.25rem;">🍲</span>
+                                    <div>
+                                        <div class="fw-bold small text-white">Prepared Food</div>
+                                        <div class="text-cream" style="font-size: 0.72rem; opacity: 0.85;">Hot meals &amp; banquet surplus verified safe within 2–4 hours</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                    <span style="font-size: 1.25rem;">🥦</span>
+                                    <div>
+                                        <div class="fw-bold small text-white">Fresh Produce</div>
+                                        <div class="text-cream" style="font-size: 0.72rem; opacity: 0.85;">Farm &amp; mandi fruit and vegetable surplus</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12);">
+                                    <span style="font-size: 1.25rem;">🌾</span>
+                                    <div>
+                                        <div class="fw-bold small text-white">Raw Ingredients &amp; Staples</div>
+                                        <div class="text-cream" style="font-size: 0.72rem; opacity: 0.85;">Bulk rice, flour, pulses, and sealed pantry goods</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <input type="password" name="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+
+                        <!-- Bottom Live Telemetry Badges -->
+                        <div class="pt-3 border-top border-secondary border-opacity-25">
+                            <div class="row g-2 text-center">
+                                <div class="col-4">
+                                    <div class="fw-extrabold text-harvest fs-5">500+</div>
+                                    <div class="text-cream text-uppercase" style="font-size: 0.65rem;">kg Rescued</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-extrabold text-leaf fs-5">1,200+</div>
+                                    <div class="text-cream text-uppercase" style="font-size: 0.65rem;">Nourished</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-extrabold text-terracotta fs-5">100%</div>
+                                    <div class="text-cream text-uppercase" style="font-size: 0.65rem;">QR Verified</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="d-grid mb-3">
-                        <button type="submit" class="btn btn-forest py-2">Sign In</button>
-                    </div>
-                </form>
+                    <!-- Right Column: Interactive Login Form & Evaluation Role Switcher -->
+                    <div class="col-lg-7 p-4 p-md-5 d-flex flex-column justify-content-center" style="background: var(--surface-cream);">
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge badge-soft badge-fresh">Authenticated Access</span>
+                                <span class="text-muted small">&bull; Multi-Role Community Gateway</span>
+                            </div>
+                            <h3 class="fw-bold text-forest mb-1">Sign In to ANNADATA AI</h3>
+                            <p class="text-muted small mb-0">Select your operational account or use one-click demo credentials below</p>
+                        </div>
 
-                <!-- One-Click Demo Credentials for Academic Evaluation -->
-                <div class="p-3 bg-light rounded border mt-3">
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="small fw-bold text-dark"><i data-lucide="key" class="me-1 text-primary" style="width: 14px; height: 14px;"></i> Demo Evaluation Accounts</span>
-                        <span class="badge badge-soft badge-soft-info" style="font-size: 0.65rem;">One-Click Fill</span>
-                    </div>
-                    <div class="d-flex flex-wrap gap-1">
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="fillLogin('restaurant@example.com', 'password123')">Restaurant</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="fillLogin('ngo@example.com', 'password123')">NGO</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="fillLogin('volunteer@example.com', 'password123')">Volunteer</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="fillLogin('admin@example.com', 'admin123')">Admin</button>
-                    </div>
-                </div>
+                        <form method="POST" action="{{ url_for('auth.login') }}">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-forest">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-warm text-muted"><i data-lucide="mail" style="width: 16px; height: 16px;"></i></span>
+                                    <input type="email" name="email" id="loginEmail" class="form-control" placeholder="name@organization.org" required>
+                                </div>
+                            </div>
 
-                <div class="text-center mt-4 small text-muted">
-                    Don't have an account yet? <a href="{{ url_for('auth.register') }}" class="text-primary fw-semibold">Register here</a>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-forest">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-warm text-muted"><i data-lucide="lock" style="width: 16px; height: 16px;"></i></span>
+                                    <input type="password" name="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-forest py-2 fw-bold shadow-sm">
+                                    <i data-lucide="log-in" class="me-1" style="width: 16px; height: 16px;"></i> Sign In to Portal
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Academic Evaluation & Viva Demo Switcher -->
+                        <div class="p-3 rounded-3 border border-warm mt-2" style="background: #FFFFFF;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="small fw-bold text-forest d-flex align-items-center gap-1">
+                                    <i data-lucide="sparkles" class="text-harvest" style="width: 14px; height: 14px;"></i> Demo Evaluation Accounts
+                                </span>
+                                <span class="badge badge-soft badge-harvest" style="font-size: 0.65rem;">1-Click Role Fill</span>
+                            </div>
+
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-3">
+                                    <button type="button" class="btn btn-outline-forest w-100 p-2 text-start text-truncate" onclick="fillLogin('restaurant@example.com', 'password123')">
+                                        <div style="font-size: 1.1rem;">🍲</div>
+                                        <div class="fw-bold" style="font-size: 0.75rem;">Donor</div>
+                                        <div class="text-muted" style="font-size: 0.65rem;">Kitchen</div>
+                                    </button>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <button type="button" class="btn btn-outline-forest w-100 p-2 text-start text-truncate" onclick="fillLogin('ngo@example.com', 'password123')">
+                                        <div style="font-size: 1.1rem;">🏡</div>
+                                        <div class="fw-bold" style="font-size: 0.75rem;">NGO</div>
+                                        <div class="text-muted" style="font-size: 0.65rem;">Shelter</div>
+                                    </button>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <button type="button" class="btn btn-outline-forest w-100 p-2 text-start text-truncate" onclick="fillLogin('volunteer@example.com', 'password123')">
+                                        <div style="font-size: 1.1rem;">🚲</div>
+                                        <div class="fw-bold" style="font-size: 0.75rem;">Volunteer</div>
+                                        <div class="text-muted" style="font-size: 0.65rem;">Courier</div>
+                                    </button>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <button type="button" class="btn btn-outline-forest w-100 p-2 text-start text-truncate" onclick="fillLogin('admin@example.com', 'admin123')">
+                                        <div style="font-size: 1.1rem;">🛡️</div>
+                                        <div class="fw-bold" style="font-size: 0.75rem;">Admin</div>
+                                        <div class="text-muted" style="font-size: 0.65rem;">Control</div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-3 small text-muted">
+                            New partner? <a href="{{ url_for('auth.register') }}" class="text-forest fw-bold text-decoration-none">Join the Network &rarr;</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

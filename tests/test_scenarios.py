@@ -1,5 +1,5 @@
-"""
-ANNADATA AI — Automated Test Suite
+﻿"""
+ANNADATA AI â€” Automated Test Suite
 Validates all 18 core architectural, functional, security, and algorithmic scenarios.
 Compatible with both `python -m unittest discover tests` and `pytest`.
 """
@@ -24,6 +24,7 @@ from app.services.qr_service import QRService
 
 
 class AnnadataTestSuite(unittest.TestCase):
+
     def setUp(self):
         self.app = create_app(config_override={
             'TESTING': True,
@@ -143,7 +144,7 @@ class AnnadataTestSuite(unittest.TestCase):
             'preparation_time': (now - timedelta(hours=1)).isoformat(),
             'collection_deadline': (now + timedelta(hours=3)).isoformat(),
             'expiry_time': (now + timedelta(hours=5)).isoformat(),
-            'storage_temperature': 'Hot Holding (65°C)',
+            'storage_temperature': 'Hot Holding (65Â°C)',
             'check_visual': 'on',
             'check_packaging': 'on',
             'check_temp': 'on',
@@ -215,9 +216,12 @@ class AnnadataTestSuite(unittest.TestCase):
     # Scenario 5: AI Category classification / fallback
     def test_05_category_fallback(self):
         agent = FoodAnalysisAgent()
-        cat = agent.categorize_with_llm("Paneer Butter Masala", "Indian cottage cheese curry")
-        self.assertIsNotNone(cat)
-        self.assertIn(cat, ["cooked meals", "vegetarian", "dairy", "other"])
+        result = agent.categorize_with_llm("Paneer Butter Masala", "Indian cottage cheese curry")
+        self.assertIsNotNone(result)
+        # categorize_with_llm now returns (donation_category, sub_category) tuple
+        donation_cat, sub_cat = result
+        self.assertIn(donation_cat, ["prepared_food", "fresh_produce", "raw_ingredients"])
+        self.assertIsNotNone(sub_cat)
 
     # Scenario 6: NGOs ranked using Smart Allocation Engine (100-pt score)
     def test_06_ngo_smart_allocation_ranking(self):
@@ -340,7 +344,8 @@ class AnnadataTestSuite(unittest.TestCase):
         self.assertEqual(mission.volunteer_id, vol.id)
         self.assertEqual(mission.status, 'volunteer_assigned')
 
-    # Scenario 10: Volunteer confirms pickup
+
+    # Scenario 10: Volunteer confirms pickup using Kitchen PIN
     def test_10_volunteer_pickup_confirmation(self):
         rest, ngo, vol, _, _, u_vol, _ = self._create_sample_entities()
         now = get_current_time().replace(tzinfo=None)
@@ -362,15 +367,23 @@ class AnnadataTestSuite(unittest.TestCase):
         db.session.commit()
 
         mission = MissionService.create_mission_for_request(don, ngo, vol)
-        success, msg = MissionService.transition_state(mission, 'pickup_initiated', u_vol)
-        self.assertTrue(success)
 
-        success2, msg2 = MissionService.transition_state(mission, 'food_collected', u_vol)
-        self.assertTrue(success2)
+        success, msg = MissionService.transition_state(
+            mission, 'pickup_initiated', u_vol
+        )
+        self.assertTrue(success, msg)
+
+        success2, msg2 = MissionService.transition_state(
+            mission,
+            'food_collected',
+            u_vol,
+            pin=mission.pickup_pin
+        )
+        self.assertTrue(success2, msg2)
         self.assertEqual(mission.status, 'food_collected')
         self.assertIsNotNone(mission.pickup_time)
 
-    # Scenario 11: Volunteer confirms delivery transition
+    # Scenario 11: Volunteer starts delivery after verified pickup
     def test_11_volunteer_delivery_initiated(self):
         rest, ngo, vol, _, _, u_vol, _ = self._create_sample_entities()
         now = get_current_time().replace(tzinfo=None)
@@ -392,13 +405,27 @@ class AnnadataTestSuite(unittest.TestCase):
         db.session.commit()
 
         mission = MissionService.create_mission_for_request(don, ngo, vol)
-        MissionService.transition_state(mission, 'pickup_initiated', u_vol)
-        MissionService.transition_state(mission, 'food_collected', u_vol)
-        success, msg = MissionService.transition_state(mission, 'delivery_initiated', u_vol)
-        self.assertTrue(success)
+
+        success, msg = MissionService.transition_state(
+            mission, 'pickup_initiated', u_vol
+        )
+        self.assertTrue(success, msg)
+
+        success, msg = MissionService.transition_state(
+            mission,
+            'food_collected',
+            u_vol,
+            pin=mission.pickup_pin
+        )
+        self.assertTrue(success, msg)
+
+        success, msg = MissionService.transition_state(
+            mission, 'delivery_initiated', u_vol
+        )
+        self.assertTrue(success, msg)
         self.assertEqual(mission.status, 'delivery_initiated')
 
-    # Scenario 12: NGO verifies delivery using PIN
+    # Scenario 12: Assigned volunteer verifies delivery using Shelter PIN
     def test_12_ngo_verifies_delivery(self):
         rest, ngo, vol, _, u_ngo, u_vol, _ = self._create_sample_entities()
         now = get_current_time().replace(tzinfo=None)
@@ -420,16 +447,48 @@ class AnnadataTestSuite(unittest.TestCase):
         db.session.commit()
 
         mission = MissionService.create_mission_for_request(don, ngo, vol)
-        MissionService.transition_state(mission, 'pickup_initiated', u_vol)
-        MissionService.transition_state(mission, 'food_collected', u_vol)
-        MissionService.transition_state(mission, 'delivery_initiated', u_vol)
 
-        success, msg = MissionService.transition_state(mission, 'delivery_confirmed', u_ngo, "PIN verified by Sister Mary")
-        self.assertTrue(success)
+        success, msg = MissionService.transition_state(
+            mission, 'pickup_initiated', u_vol
+        )
+        self.assertTrue(success, msg)
+
+        success, msg = MissionService.transition_state(
+            mission,
+            'food_collected',
+            u_vol,
+            pin=mission.pickup_pin
+        )
+        self.assertTrue(success, msg)
+
+        success, msg = MissionService.transition_state(
+            mission, 'delivery_initiated', u_vol
+        )
+        self.assertTrue(success, msg)
+
+        # NGO cannot confirm delivery directly.
+        success, msg = MissionService.transition_state(
+            mission,
+            'delivery_confirmed',
+            u_ngo,
+            "PIN verified by NGO"
+        )
+        self.assertFalse(success)
+        self.assertEqual(mission.status, 'delivery_initiated')
+
+        # Assigned volunteer confirms delivery using the correct PIN.
+        success, msg = MissionService.transition_state(
+            mission,
+            'delivery_confirmed',
+            u_vol,
+            "Shelter Delivery PIN verified.",
+            pin=mission.verification_pin
+        )
+        self.assertTrue(success, msg)
         self.assertEqual(mission.status, 'delivery_confirmed')
         self.assertIsNotNone(mission.delivery_time)
 
-    # Scenario 13: Impact metrics update strictly on successful delivery
+    # Scenario 13: Impact metrics update only after verified delivery
     def test_13_impact_metrics_only_on_delivery(self):
         rest, ngo, vol, _, u_ngo, u_vol, _ = self._create_sample_entities()
         now = get_current_time().replace(tzinfo=None)
@@ -451,22 +510,68 @@ class AnnadataTestSuite(unittest.TestCase):
         db.session.commit()
 
         impact_before = ImpactAnalyticsService.get_comprehensive_impact()
-        initial_kg = impact_before['verified_summary']['total_kg_rescued']
+        initial_kg = impact_before['verified_summary']['total_waste_prevented_kg']
 
         mission = MissionService.create_mission_for_request(don, ngo, vol)
-        # Pending mission should NOT update verified kg
-        impact_pending = ImpactAnalyticsService.get_comprehensive_impact()
-        self.assertEqual(impact_pending['verified_summary']['total_kg_rescued'], initial_kg)
 
-        # Transition to delivery confirmed
-        MissionService.transition_state(mission, 'pickup_initiated', u_vol)
-        MissionService.transition_state(mission, 'food_collected', u_vol)
-        MissionService.transition_state(mission, 'delivery_initiated', u_vol)
-        MissionService.transition_state(mission, 'delivery_confirmed', u_ngo)
+        # Pending mission should NOT update verified kg.
+        impact_pending = ImpactAnalyticsService.get_comprehensive_impact()
+        self.assertEqual(
+            impact_pending['verified_summary']['total_waste_prevented_kg'],
+            initial_kg
+        )
+
+        # Start pickup and verify Kitchen PIN.
+        success, msg = MissionService.transition_state(
+            mission, 'pickup_initiated', u_vol
+        )
+        self.assertTrue(success, msg)
+
+        success, msg = MissionService.transition_state(
+            mission,
+            'food_collected',
+            u_vol,
+            pin=mission.pickup_pin
+        )
+        self.assertTrue(success, msg)
+
+        # Start delivery.
+        success, msg = MissionService.transition_state(
+            mission, 'delivery_initiated', u_vol
+        )
+        self.assertTrue(success, msg)
+
+        # NGO cannot confirm delivery without volunteer PIN verification.
+        success, msg = MissionService.transition_state(
+            mission, 'delivery_confirmed', u_ngo
+        )
+        self.assertFalse(success)
+
+        impact_without_verification = ImpactAnalyticsService.get_comprehensive_impact()
+        self.assertEqual(
+            impact_without_verification['verified_summary']['total_waste_prevented_kg'],
+            initial_kg
+        )
+
+        # Assigned volunteer verifies the Shelter PIN.
+        success, msg = MissionService.transition_state(
+            mission,
+            'delivery_confirmed',
+            u_vol,
+            pin=mission.verification_pin
+        )
+        self.assertTrue(success, msg)
 
         impact_after = ImpactAnalyticsService.get_comprehensive_impact()
-        self.assertGreater(impact_after['verified_summary']['total_kg_rescued'], initial_kg)
-        self.assertGreater(impact_after['verified_summary']['total_co2_kg'], 0.0)
+        self.assertGreater(
+            impact_after['verified_summary']['total_waste_prevented_kg'],
+            initial_kg
+        )
+        self.assertGreater(
+            impact_after['verified_summary']['total_co2_kg'],
+            0.0
+        )
+
 
     # Scenario 14: Emergency alerts trigger correctly
     def test_14_emergency_alert_trigger(self):

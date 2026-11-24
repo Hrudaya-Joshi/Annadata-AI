@@ -76,9 +76,9 @@ class NGOMatchingAgent(BaseAgent):
                 if self.llm.available:
                     prompt = (
                         f"Explain concisely in 2 sentences why NGO '{top['name']}' is recommended "
-                        f"for donation '{donation.food_name}' ({donation.quantity} {donation.unit}), "
-                        f"based on distance {top['distance_km']} km, suitability score {top['score']}/100, "
-                        f"and fairness allocation balancing."
+                        f"for {donation.donation_category or 'food'} donation '{donation.food_name}' ({donation.quantity} {donation.unit}), "
+                        f"based on distance {top['distance_km']} km, compatibility score {top['score']}/100, "
+                        f"storage facility alignment, and active demand."
                     )
                     explanation = self.llm.generate(prompt, max_tokens=120) or ""
 

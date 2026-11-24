@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Donation Creation Wizard — ANNADATA AI{% endblock %}
+{% block title %}Food Rescue Donation Wizard — ANNADATA AI{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -7,16 +7,20 @@
         <div class="col-lg-9 col-xl-8">
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div>
-                    <h3 class="fw-bold mb-1">New Food Donation Wizard</h3>
-                    <p class="text-muted small mb-0">Follow the 6-step verified surplus registration protocol</p>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge badge-soft badge-fresh">Food Rescue Protocol</span>
+                        <span class="text-muted small">&bull; 6-Step Verified Intake</span>
+                    </div>
+                    <h3 class="fw-bold text-forest mb-0">Post a Food Rescue Batch</h3>
+                    <p class="text-muted small mb-0">Select your donation type and complete the rescue intake form</p>
                 </div>
                 <a href="{{ url_for('restaurant.dashboard') }}" class="btn btn-outline-forest btn-sm">
-                    <i data-lucide="arrow-left" class="me-1" style="width: 14px; height: 14px;"></i> Back to Dashboard
+                    <i data-lucide="arrow-left" class="me-1" style="width: 14px; height: 14px;"></i> Back
                 </a>
             </div>
 
-            <div class="card-premium p-4 p-md-5">
-                <!-- Stepper Progress Indicators -->
+            <div class="card-premium p-4 p-md-5" style="background: var(--surface-white); border: 2px solid var(--border-warm);">
+                <!-- Stepper -->
                 <div class="wizard-steps mb-4">
                     <div class="wizard-step active" id="stepIndicator1">1</div>
                     <div class="wizard-step" id="stepIndicator2">2</div>
@@ -27,191 +31,428 @@
                 </div>
 
                 <form method="POST" action="{{ url_for('restaurant.donate') }}" id="wizardForm">
-                    <!-- STEP 1: Food Information -->
+                    <!-- Hidden: donation_category set by JS when user picks a card -->
+                    <input type="hidden" name="donation_category" id="donationCategoryField" value="prepared_food">
+
+                    <!-- ==================== STEP 1: Donation Type ==================== -->
                     <div class="wizard-pane active" id="wizardPane1">
-                        <h5 class="fw-bold text-primary mb-3">Step 1: Food Information</h5>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Food Name / Batch Title *</label>
-                            <input type="text" name="food_name" id="foodName" class="form-control" placeholder="e.g. Steamed Basmati Rice & Dal Makhani" required>
-                            <div class="form-text">Describe the primary food item being rescued.</div>
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div style="width:32px;height:32px;border-radius:8px;background:var(--leaf-soft);color:var(--forest-green);display:flex;align-items:center;justify-content:center;">
+                                <i data-lucide="layers" style="width:18px;height:18px;"></i>
+                            </div>
+                            <h5 class="fw-bold text-forest mb-0">Step 1: Choose Donation Type</h5>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Culinary Description / Ingredients</label>
-                            <textarea name="description" id="foodDesc" class="form-control" rows="3" placeholder="Freshly prepared lunch batch, packed in standard food-grade sealed trays."></textarea>
+                        <p class="text-muted small mb-3">Select the category of food you are donating. This determines the rescue protocol and NGO matching rules.</p>
+
+                        <div class="row g-3 mb-4">
+                            <!-- Prepared Food Card -->
+                            <div class="col-md-4">
+                                <div class="donation-type-card p-3 rounded-3 border border-2 text-center h-100 selected-type"
+                                     id="typeCard_prepared_food"
+                                     onclick="selectDonationType('prepared_food')"
+                                     style="cursor:pointer; border-color:#244C38 !important; background:rgba(36,76,56,0.07); transition:all 0.2s;">
+                                    <div style="font-size:2.5rem; margin-bottom:0.4rem;">🍲</div>
+                                    <div class="fw-bold text-forest mb-1">Prepared Food</div>
+                                    <div class="text-muted" style="font-size:0.75rem; line-height:1.4;">
+                                        Restaurant meals, event surplus, canteen food, cooked curries &amp; baked goods
+                                    </div>
+                                    <div class="mt-2">
+                                        <span class="badge" style="background:rgba(36,76,56,0.12);color:#244C38;font-size:0.65rem;">Hot / Chilled</span>
+                                        <span class="badge" style="background:rgba(36,76,56,0.12);color:#244C38;font-size:0.65rem;">1–8 hrs</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fresh Produce Card -->
+                            <div class="col-md-4">
+                                <div class="donation-type-card p-3 rounded-3 border border-2 border-warm text-center h-100"
+                                     id="typeCard_fresh_produce"
+                                     onclick="selectDonationType('fresh_produce')"
+                                     style="cursor:pointer; transition:all 0.2s;">
+                                    <div style="font-size:2.5rem; margin-bottom:0.4rem;">🥦</div>
+                                    <div class="fw-bold text-forest mb-1">Fresh Produce</div>
+                                    <div class="text-muted" style="font-size:0.75rem; line-height:1.4;">
+                                        Fruits, vegetables, leafy greens, agricultural excess from farms &amp; markets
+                                    </div>
+                                    <div class="mt-2">
+                                        <span class="badge" style="background:rgba(242,181,68,0.18);color:#8A6200;font-size:0.65rem;">Ambient / Cold</span>
+                                        <span class="badge" style="background:rgba(242,181,68,0.18);color:#8A6200;font-size:0.65rem;">Up to 4 days</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Raw Ingredients Card -->
+                            <div class="col-md-4">
+                                <div class="donation-type-card p-3 rounded-3 border border-2 border-warm text-center h-100"
+                                     id="typeCard_raw_ingredients"
+                                     onclick="selectDonationType('raw_ingredients')"
+                                     style="cursor:pointer; transition:all 0.2s;">
+                                    <div style="font-size:2.5rem; margin-bottom:0.4rem;">🌾</div>
+                                    <div class="fw-bold text-forest mb-1">Raw Ingredients</div>
+                                    <div class="text-muted" style="font-size:0.75rem; line-height:1.4;">
+                                        Rice, wheat, flour, pulses, lentils, oil &amp; packaged cooking staples
+                                    </div>
+                                    <div class="mt-2">
+                                        <span class="badge" style="background:rgba(232,121,70,0.15);color:#A54B1D;font-size:0.65rem;">Dry Storage</span>
+                                        <span class="badge" style="background:rgba(232,121,70,0.15);color:#A54B1D;font-size:0.65rem;">Weeks–Months</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
                         <div class="d-flex justify-content-end">
-                            <button type="button" class="btn btn-forest px-4" onclick="goToStep(2)">Next: Quantity & Category &rarr;</button>
+                            <button type="button" class="btn btn-forest px-5" onclick="goToStep(2)">
+                                Next: Food Details &rarr;
+                            </button>
                         </div>
                     </div>
 
-                    <!-- STEP 2: Quantity and Category -->
+                    <!-- ==================== STEP 2: Food Details (Category-Adaptive) ==================== -->
                     <div class="wizard-pane d-none" id="wizardPane2">
-                        <h5 class="fw-bold text-primary mb-3">Step 2: Quantity & Category</h5>
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Food Category *</label>
-                                <select name="category" id="foodCategory" class="form-select" required>
-                                    <option value="cooked meals" selected>Cooked Meals</option>
-                                    <option value="vegetarian">Vegetarian</option>
-                                    <option value="non-vegetarian">Non-Vegetarian</option>
-                                    <option value="vegan">Vegan</option>
-                                    <option value="baked goods">Baked Goods</option>
-                                    <option value="dairy">Dairy</option>
-                                    <option value="fruits">Fruits & Raw Produce</option>
-                                    <option value="beverages">Beverages</option>
-                                    <option value="snacks">Snacks</option>
-                                </select>
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div style="width:32px;height:32px;border-radius:8px;background:var(--leaf-soft);color:var(--forest-green);display:flex;align-items:center;justify-content:center;">
+                                <i data-lucide="utensils" style="width:18px;height:18px;"></i>
                             </div>
-                            <div class="col-md-3 col-6">
-                                <label class="form-label small fw-semibold">Quantity *</label>
+                            <h5 class="fw-bold text-forest mb-0">Step 2: Donation Details</h5>
+                        </div>
+
+                        <!-- Shared: Food Name & Description -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-forest">Donation Name / Batch Title *</label>
+                            <input type="text" name="food_name" id="foodName" class="form-control" placeholder="e.g. Paneer Butter Masala &amp; Roti" required>
+                            <div class="form-text text-muted" style="font-size:0.75rem;" id="foodNameHint">Describe the main food item being rescued.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-forest">Description / Additional Notes</label>
+                            <textarea name="description" id="foodDesc" class="form-control" rows="2" placeholder="Freshly prepared lunch batch from wedding event, includes dal makhani and rice..."></textarea>
+                        </div>
+
+                        <!-- PREPARED FOOD specific -->
+                        <div id="preparedFields">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Sub-Category *</label>
+                                    <select name="category" id="prepCategory" class="form-select">
+                                        <option value="cooked meals">🍲 Cooked Meals / Curries</option>
+                                        <option value="vegetarian">🥗 Pure Vegetarian</option>
+                                        <option value="non-vegetarian">🍗 Non-Vegetarian</option>
+                                        <option value="vegan">🌱 Vegan</option>
+                                        <option value="baked goods">🍞 Baked Goods &amp; Bread</option>
+                                        <option value="dairy">🥛 Dairy &amp; Milk</option>
+                                        <option value="snacks">🥪 Snacks &amp; Sandwiches</option>
+                                        <option value="beverages">☕ Beverages &amp; Juices</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Dietary &amp; Allergen Flags</label>
+                                    <input type="text" name="dietary_flags" id="foodFlags" class="form-control" placeholder="e.g. Vegetarian, Nut-Free, Halal, Jain">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FRESH PRODUCE specific -->
+                        <div id="produceFields" class="d-none">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Produce Sub-Category *</label>
+                                    <select name="category" id="produceCategory" class="form-select">
+                                        <option value="fruits">🍎 Fresh Fruits</option>
+                                        <option value="vegetables">🥦 Fresh Vegetables</option>
+                                        <option value="leafy greens">🌿 Leafy Greens</option>
+                                        <option value="root vegetables">🥕 Root Vegetables</option>
+                                        <option value="mixed produce">🧺 Mixed Produce</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Produce Type (Specific)</label>
+                                    <input type="text" name="produce_type" id="produceType" class="form-control" placeholder="e.g. Alphonso Mango, Spinach, Tomatoes">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Freshness Condition</label>
+                                    <select name="freshness_condition" id="freshnessCondition" class="form-select">
+                                        <option value="excellent">Excellent — Farm fresh, peak ripeness</option>
+                                        <option value="good">Good — Fully usable, minor cosmetic marks</option>
+                                        <option value="fair">Fair — Usable but should be used today</option>
+                                        <option value="near_expiry">Near Expiry — Must distribute immediately</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Harvest / Purchase Date</label>
+                                    <input type="date" name="harvest_date" id="harvestDate" class="form-control">
+                                    <div class="form-text text-muted" style="font-size:0.72rem;">Optional — helps NGOs assess shelf life</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RAW INGREDIENTS specific -->
+                        <div id="rawFields" class="d-none">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Ingredient Sub-Category *</label>
+                                    <select name="category" id="rawCategory" class="form-select">
+                                        <option value="rice">🌾 Rice (Basmati / Non-Basmati)</option>
+                                        <option value="pulses">🫘 Pulses &amp; Lentils</option>
+                                        <option value="flour">🌾 Wheat Flour / Atta</option>
+                                        <option value="oil">🫙 Cooking Oil</option>
+                                        <option value="sugar">🫙 Sugar / Jaggery</option>
+                                        <option value="spices">🧂 Spices &amp; Condiments</option>
+                                        <option value="mixed staples">📦 Mixed Staple Pack</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Specific Ingredient Name</label>
+                                    <input type="text" name="ingredient_name" id="ingredientName" class="form-control" placeholder="e.g. Toor Dal, Basmati Rice 1121">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Packaging Condition</label>
+                                    <select name="packaging_condition" id="packagingCondition" class="form-select">
+                                        <option value="factory_sealed">Factory Sealed — Original seal intact</option>
+                                        <option value="opened">Opened — Resealed but usable</option>
+                                        <option value="bulk_sack">Bulk Jute Sack — Unpackaged grain/pulse</option>
+                                        <option value="loose">Loose / Measured in bulk</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-forest">Storage Requirements</label>
+                                    <input type="text" name="storage_requirements" id="storageReqs" class="form-control" placeholder="e.g. Cool dry place, away from moisture">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-forest" onclick="goToStep(1)">&larr; Back</button>
+                            <button type="button" class="btn btn-forest px-4" onclick="goToStep(3)">Next: Quantity &amp; Timing &rarr;</button>
+                        </div>
+                    </div>
+
+                    <!-- ==================== STEP 3: Quantity & Timing ==================== -->
+                    <div class="wizard-pane d-none" id="wizardPane3">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div style="width:32px;height:32px;border-radius:8px;background:var(--harvest-soft);color:#B37D00;display:flex;align-items:center;justify-content:center;">
+                                <i data-lucide="scale" style="width:18px;height:18px;"></i>
+                            </div>
+                            <h5 class="fw-bold text-forest mb-0">Step 3: Quantity &amp; Time Window</h5>
+                        </div>
+                        <p class="text-muted small" id="timingHint">Accurate quantities and timing help the AI match the right NGO with the right capacity.</p>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-forest">Quantity *</label>
                                 <input type="number" name="quantity" id="foodQty" class="form-control" value="25" min="1" required>
                             </div>
-                            <div class="col-md-3 col-6">
-                                <label class="form-label small fw-semibold">Unit *</label>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-forest">Unit *</label>
                                 <select name="unit" id="foodUnit" class="form-select">
-                                    <option value="packets" selected>Packets / Servings</option>
+                                    <option value="packets">Packets / Servings</option>
                                     <option value="kg">Kilograms (kg)</option>
-                                    <option value="liters">Liters (L)</option>
-                                    <option value="trays">Trays</option>
+                                    <option value="trays">Thermal Trays</option>
+                                    <option value="liters">Liters</option>
                                 </select>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label small fw-semibold">Dietary & Allergen Badges</label>
-                                <input type="text" name="dietary_flags" id="foodFlags" class="form-control" placeholder="e.g. Vegetarian, Nut-Free, Halal, Jain Compatible">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-forest">Storage Temperature</label>
+                                <select name="storage_temperature" id="storageTempSelect" class="form-select">
+                                    <option value="Hot Holding (above 60°C)">Hot Holding (&gt;60°C)</option>
+                                    <option value="Refrigerated (under 5°C)">Refrigerated (&lt;5°C)</option>
+                                    <option value="Ambient Room Temperature">Ambient / Room Temp</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-outline-secondary" onclick="goToStep(1)">&larr; Back</button>
-                            <button type="button" class="btn btn-forest px-4" onclick="goToStep(3)">Next: Timings & Lifespan &rarr;</button>
-                        </div>
-                    </div>
 
-                    <!-- STEP 3: Timings, Expiry & Collection Deadline -->
-                    <div class="wizard-pane d-none" id="wizardPane3">
-                        <h5 class="fw-bold text-primary mb-3">Step 3: Preparation, Expiry & Deadline</h5>
-                        <p class="text-muted small">Food safety requires verified chronologies. Collection must take place prior to expiry.</p>
                         <div class="row g-3 mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label small fw-semibold">Preparation Time *</label>
-                                <input type="datetime-local" name="preparation_time" id="prepTime" class="form-control" required>
+                            <!-- Prepared Food: preparation_time shown -->
+                            <div class="col-md-4" id="prepTimeField">
+                                <label class="form-label small fw-bold text-forest">Food Prepared At</label>
+                                <input type="datetime-local" name="preparation_time" id="prepTime" class="form-control">
+                                <div class="form-text text-muted" style="font-size:0.72rem;">When was this food cooked/prepared?</div>
                             </div>
+                            <!-- Produce: harvest_date_timing shown (note: also in Step 2 for produce) -->
                             <div class="col-md-4">
-                                <label class="form-label small fw-semibold">Collection Deadline *</label>
+                                <label class="form-label small fw-bold text-forest">Collection Deadline *</label>
                                 <input type="datetime-local" name="collection_deadline" id="deadTime" class="form-control" required>
-                                <div class="form-text" style="font-size: 0.75rem;">Must be collected by courier before this time.</div>
+                                <div class="form-text text-terracotta" style="font-size:0.72rem;">Must be picked up before this time.</div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-semibold">Food Expiry Time *</label>
+                                <label class="form-label small fw-bold text-forest" id="expiryLabel">Food Expiry / Best-Before *</label>
                                 <input type="datetime-local" name="expiry_time" id="expTime" class="form-control" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Storage Temperature</label>
-                                <select name="storage_temperature" class="form-select">
-                                    <option value="Hot Holding (above 60°C)">Hot Holding (above 60°C)</option>
-                                    <option value="Refrigerated (under 5°C)">Refrigerated (under 5°C)</option>
-                                    <option value="Room Temperature">Room Temperature (dry goods/produce)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Packaging Type</label>
-                                <input type="text" name="packaging_type" class="form-control" value="Food-grade heat-sealed containers">
+                                <div class="form-text text-muted" style="font-size:0.72rem;" id="expiryHint">Time after which the food is no longer safe/usable.</div>
                             </div>
                         </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-forest">Packaging Description</label>
+                                <input type="text" name="packaging_type" id="packagingType" class="form-control" value="Food-grade sealed containers">
+                            </div>
+                            <div class="col-md-6" id="tempReadingField">
+                                <label class="form-label small fw-bold text-forest">Measured Temperature (°C)</label>
+                                <input type="number" step="0.1" name="temperature_celsius" id="tempCelsius" class="form-control" value="65.0">
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-outline-secondary" onclick="goToStep(2)">&larr; Back</button>
+                            <button type="button" class="btn btn-outline-forest" onclick="goToStep(2)">&larr; Back</button>
                             <button type="button" class="btn btn-forest px-4" onclick="goToStep(4)">Next: Pickup Location &rarr;</button>
                         </div>
                     </div>
 
-                    <!-- STEP 4: Pickup Location -->
+                    <!-- ==================== STEP 4: Pickup Location ==================== -->
                     <div class="wizard-pane d-none" id="wizardPane4">
-                        <h5 class="fw-bold text-primary mb-3">Step 4: Pickup Location & Dispatch Contact</h5>
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div style="width:32px;height:32px;border-radius:8px;background:var(--leaf-soft);color:var(--forest-green);display:flex;align-items:center;justify-content:center;">
+                                <i data-lucide="map-pin" style="width:18px;height:18px;"></i>
+                            </div>
+                            <h5 class="fw-bold text-forest mb-0">Step 4: Pickup Location</h5>
+                        </div>
+
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold">Pickup Address *</label>
-                            <input type="text" name="location_address" id="pickupAddr" class="form-control" value="{{ restaurant.location_address }}" required>
-                        </div>
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Latitude</label>
-                                <input type="number" step="any" name="latitude" id="pickupLat" class="form-control" value="{{ restaurant.latitude }}">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-bold text-forest mb-0">Pickup Address *</label>
+                                <button type="button" class="gps-detect-btn" id="btnDetectLocation" onclick="window.annadataGeo.detectLocation({addressInputId:'pickupAddr', latInputId:'pickupLat', lngInputId:'pickupLng', statusId:'geoStatusDonate', buttonId:'btnDetectLocation'})">
+                                    <i data-lucide="crosshair" style="width:14px;height:14px;"></i> Use My Current Location
+                                </button>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Longitude</label>
-                                <input type="number" step="any" name="longitude" id="pickupLng" class="form-control" value="{{ restaurant.longitude }}">
-                            </div>
+                            <input type="text" name="location_address" id="pickupAddr" class="form-control" value="{{ restaurant.location_address }}" placeholder="e.g. 123 100-Ft Road, Indiranagar, Bengaluru" required>
+                            <div id="geoStatusDonate" class="mt-2"></div>
                         </div>
+
+                        <!-- Lat/Lng stored internally, hidden from user view -->
+                        <input type="hidden" name="latitude" id="pickupLat" value="{{ restaurant.latitude or 12.9716 }}">
+                        <input type="hidden" name="longitude" id="pickupLng" value="{{ restaurant.longitude or 77.5946 }}">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-forest">Photo URL (Optional)</label>
+                            <input type="url" name="image_url" id="imageUrl" class="form-control" placeholder="https://example.com/food-photo.jpg">
+                            <div class="form-text text-muted" style="font-size:0.72rem;">Link to a photo of the food batch. Helps NGOs verify quantity and condition.</div>
+                        </div>
+
                         <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-outline-secondary" onclick="goToStep(3)">&larr; Back</button>
+                            <button type="button" class="btn btn-outline-forest" onclick="goToStep(3)">&larr; Back</button>
                             <button type="button" class="btn btn-forest px-4" onclick="goToStep(5)">Next: Safety Checklist &rarr;</button>
                         </div>
                     </div>
 
-                    <!-- STEP 5: Safety Checklist -->
+                    <!-- ==================== STEP 5: Safety Checklist (Category-Adaptive) ==================== -->
                     <div class="wizard-pane d-none" id="wizardPane5">
-                        <h5 class="fw-bold text-primary mb-3">Step 5: Food Safety & Traceability Verification</h5>
-                        <p class="text-muted small">Deterministic compliance verification. Authorized food handler must confirm:</p>
-                        
-                        <div class="p-3 bg-light rounded border mb-3">
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="check_visual" id="c1" checked required>
-                                <label class="form-check-label small fw-semibold" for="c1">Visual & olfactory inspection passed (no discoloration, off-odors, or moisture contamination).</label>
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div style="width:32px;height:32px;border-radius:8px;background:var(--leaf-soft);color:var(--leaf-green);display:flex;align-items:center;justify-content:center;">
+                                <i data-lucide="shield-check" style="width:18px;height:18px;"></i>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="check_packaging" id="c2" checked required>
-                                <label class="form-check-label small fw-semibold" for="c2">Packaging intact and sealed in food-grade, leak-proof sanitized containers.</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="check_temp" id="c3" checked required>
-                                <label class="form-check-label small fw-semibold" for="c3">Maintained under active temperature controls (either &gt;60°C hot holding or &lt;5°C refrigeration).</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" name="check_allergens" id="c4" checked required>
-                                <label class="form-check-label small fw-semibold" for="c4">All major allergens (nuts, dairy, gluten, shellfish) are identified or explicitly flagged.</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="check_hygiene" id="c5" checked required>
-                                <label class="form-check-label small fw-semibold" for="c5">Food prepared in licensed, hygiene-verified commercial kitchen environment.</label>
+                            <h5 class="fw-bold text-forest mb-0">Step 5: Safety Verification</h5>
+                        </div>
+
+                        <!-- PREPARED FOOD Safety Checklist (5-point full) -->
+                        <div id="safetyPrepared">
+                            <p class="text-muted small">An authorized kitchen manager must inspect and certify all 5 points:</p>
+                            <div class="p-4 rounded-3 border border-warm mb-3" style="background: var(--surface-cream);">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="check_visual" id="c1" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="c1">Visual &amp; olfactory inspection passed — no discoloration, off-odors, or moisture contamination.</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="check_packaging" id="c2" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="c2">Packaging intact and sealed in food-grade, leak-proof sanitized containers.</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="check_temp" id="c3" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="c3">Temperature controls maintained — above 60°C (hot holding) or below 5°C (refrigerated).</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="check_allergens" id="c4" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="c4">All major allergens (nuts, dairy, gluten, shellfish) identified or explicitly disclosed.</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="check_hygiene" id="c5" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="c5">Food prepared in a licensed, hygiene-verified commercial kitchen environment.</label>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Measured Holding Temperature (°C)</label>
-                            <input type="number" step="0.1" name="temperature_celsius" class="form-control" value="65.0" style="max-width: 180px;">
+                        <!-- FRESH PRODUCE Safety Checklist (3-point simplified) -->
+                        <div id="safetyproduce" class="d-none">
+                            <p class="text-muted small">3-point produce inspection by authorized handler:</p>
+                            <div class="p-4 rounded-3 border border-warm mb-3" style="background: rgba(242,181,68,0.07);">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="check_visual" id="p1" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="p1">Produce visually inspected — no mold, rot, or signs of pest damage on majority of batch.</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="check_packaging" id="p2" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="p2">Stored in ventilated, clean containers or crates. No contact with contaminated surfaces.</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="check_hygiene" id="p3" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="p3">Kept away from chemicals, fertilisers, pesticide containers during storage and transit.</label>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-3" style="background:rgba(36,76,56,0.07); border-left:3px solid #244C38; font-size:0.8rem;">
+                                <strong class="text-forest">Note:</strong> ANNADATA AI will flag fresh produce for mandatory human verification before NGO distribution. AI does <strong>not</strong> auto-certify produce as safe.
+                            </div>
+                        </div>
+
+                        <!-- RAW INGREDIENTS Safety Checklist (3-point simplified) -->
+                        <div id="safetyRaw" class="d-none">
+                            <p class="text-muted small">3-point raw ingredient inspection:</p>
+                            <div class="p-4 rounded-3 border border-warm mb-3" style="background: rgba(232,121,70,0.06);">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="check_visual" id="r1" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="r1">Visually inspected — no weevils, mold, moisture damage, or unusual odor in the ingredient batch.</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="check_packaging" id="r2" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="r2">Packaging is intact or bulk goods are protected from moisture in clean, dry containers.</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="check_hygiene" id="r3" checked>
+                                    <label class="form-check-label small fw-semibold text-forest" for="r3">Best-before / expiry date is verified and ingredient is within its safe use window.</label>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-outline-secondary" onclick="goToStep(4)">&larr; Back</button>
-                            <button type="button" class="btn btn-forest px-4" onclick="goToStep(6)">Next: Review & Submit &rarr;</button>
+                            <button type="button" class="btn btn-outline-forest" onclick="goToStep(4)">&larr; Back</button>
+                            <button type="button" class="btn btn-forest px-4" onclick="goToStep(6)">Next: Review &amp; Submit &rarr;</button>
                         </div>
                     </div>
 
-                    <!-- STEP 6: Review and Submit -->
+                    <!-- ==================== STEP 6: Review & Submit ==================== -->
                     <div class="wizard-pane d-none" id="wizardPane6">
-                        <h5 class="fw-bold text-primary mb-3">Step 6: Review & Finalize Submission</h5>
-                        <p class="text-muted small">Upon submission, ANNADATA AI will immediately execute the Food Analysis Agent and initiate Smart NGO Allocation.</p>
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div style="width:32px;height:32px;border-radius:8px;background:var(--harvest-soft);color:#B37D00;display:flex;align-items:center;justify-content:center;">
+                                <i data-lucide="check" style="width:18px;height:18px;"></i>
+                            </div>
+                            <h5 class="fw-bold text-forest mb-0">Step 6: Review &amp; Finalize</h5>
+                        </div>
+                        <p class="text-muted small">Upon submission, ANNADATA AI immediately runs the Food Analysis Agent and Smart NGO Allocation.</p>
 
-                        <div class="card p-3 mb-4 bg-light border-0">
+                        <div class="card p-3 mb-4 rounded-3 border border-warm" style="background: var(--surface-cream);">
                             <div class="row g-2 small">
-                                <div class="col-4 text-muted">Food Item:</div>
-                                <div class="col-8 fw-bold" id="revFood">Basmati Rice & Dal</div>
-                                <div class="col-4 text-muted">Category:</div>
-                                <div class="col-8 fw-semibold" id="revCat">Cooked Meals</div>
-                                <div class="col-4 text-muted">Quantity:</div>
-                                <div class="col-8 fw-semibold" id="revQty">25 Packets</div>
-                                <div class="col-4 text-muted">Address:</div>
-                                <div class="col-8" id="revAddr">{{ restaurant.location_address }}</div>
-                                <div class="col-4 text-muted">Safety Status:</div>
-                                <div class="col-8 text-success fw-bold"><i data-lucide="check-circle" class="me-1" style="width: 14px; height: 14px;"></i> 5/5 Checks Confirmed</div>
+                                <div class="col-5 text-muted fw-bold">Donation Type:</div>
+                                <div class="col-7 fw-bold text-forest" id="revType">Prepared Food</div>
+                                <div class="col-5 text-muted fw-bold">Food Item:</div>
+                                <div class="col-7 fw-bold text-forest" id="revFood">—</div>
+                                <div class="col-5 text-muted fw-bold">Sub-Category:</div>
+                                <div class="col-7 fw-semibold text-forest" id="revCat">—</div>
+                                <div class="col-5 text-muted fw-bold">Quantity:</div>
+                                <div class="col-7 fw-semibold text-leaf" id="revQty">—</div>
+                                <div class="col-5 text-muted fw-bold">Pickup Address:</div>
+                                <div class="col-7 text-forest" id="revAddr">{{ restaurant.location_address }}</div>
+                                <div class="col-5 text-muted fw-bold">Safety Checks:</div>
+                                <div class="col-7 text-leaf fw-bold">
+                                    <i data-lucide="check-circle" class="me-1" style="width:14px;height:14px;"></i> Verified &amp; Submitted
+                                </div>
                             </div>
                         </div>
 
+                        <div class="p-3 rounded-3 mb-4" style="background:rgba(36,76,56,0.07); border-left:3px solid #244C38; font-size:0.8rem;">
+                            <strong class="text-forest">AI Pipeline:</strong> Food Analysis Agent → Safety Scoring → Smart NGO Allocation → Courier Assignment → QR Rescue Passport Generation
+                        </div>
+
                         <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-outline-secondary" onclick="goToStep(5)">&larr; Back</button>
-                            <button type="submit" class="btn btn-emerald px-5 py-2 fw-bold">
-                                <i data-lucide="send" class="me-1" style="width: 16px; height: 16px;"></i> Submit Food Donation
+                            <button type="button" class="btn btn-outline-forest" onclick="goToStep(5)">&larr; Back</button>
+                            <button type="submit" class="btn btn-leaf px-5 py-2 fw-bold shadow-sm">
+                                <i data-lucide="send" class="me-1" style="width:16px;height:16px;"></i> Submit Food Donation
                             </button>
                         </div>
                     </div>
+
                 </form>
             </div>
         </div>
@@ -219,52 +460,152 @@
 </div>
 
 <script>
-function initDefaultTimings() {
-    const now = new Date();
-    // Default preparation: 1 hour ago
-    const prep = new Date(now.getTime() - 60 * 60 * 1000);
-    // Collection deadline: 3 hours from now
-    const dead = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-    // Expiry: 6 hours from now
-    const exp = new Date(now.getTime() + 6 * 60 * 60 * 1000);
+let selectedCategory = 'prepared_food';
 
-    const toLocalISO = (d) => {
-        const offset = d.getTimezoneOffset() * 60000;
-        return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+function selectDonationType(cat) {
+    selectedCategory = cat;
+    document.getElementById('donationCategoryField').value = cat;
+
+    // Reset all cards
+    ['prepared_food', 'fresh_produce', 'raw_ingredients'].forEach(c => {
+        const card = document.getElementById('typeCard_' + c);
+        if (card) {
+            card.style.borderColor = '';
+            card.style.background = '';
+        }
+    });
+
+    // Highlight selected
+    const sel = document.getElementById('typeCard_' + cat);
+    if (sel) {
+        sel.style.borderColor = '#244C38';
+        sel.style.background = 'rgba(36,76,56,0.07)';
+    }
+}
+
+function applyCategory(cat) {
+    // Show/hide category-specific fields in Step 2
+    document.getElementById('preparedFields').classList.toggle('d-none', cat !== 'prepared_food');
+    document.getElementById('produceFields').classList.toggle('d-none', cat !== 'fresh_produce');
+    document.getElementById('rawFields').classList.toggle('d-none', cat !== 'raw_ingredients');
+
+    // Show/hide safety checklists in Step 5
+    document.getElementById('safetyPrepared').classList.toggle('d-none', cat !== 'prepared_food');
+    document.getElementById('safetyproduce').classList.toggle('d-none', cat !== 'fresh_produce');
+    document.getElementById('safetyRaw').classList.toggle('d-none', cat !== 'raw_ingredients');
+
+    // Adjust unit options in Step 3
+    const unitSelect = document.getElementById('foodUnit');
+    unitSelect.innerHTML = '';
+    const unitMap = {
+        prepared_food: [['packets','Packets / Servings'],['kg','Kilograms (kg)'],['trays','Thermal Trays'],['liters','Liters']],
+        fresh_produce: [['kg','Kilograms (kg)'],['crates','Crates'],['baskets','Baskets'],['boxes','Boxes']],
+        raw_ingredients: [['kg','Kilograms (kg)'],['sacks','Sacks (25 kg each)'],['bags','Bags'],['boxes','Boxes']]
     };
+    (unitMap[cat] || unitMap.prepared_food).forEach(([v, t]) => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = t;
+        unitSelect.appendChild(o);
+    });
 
-    document.getElementById('prepTime').value = toLocalISO(prep);
-    document.getElementById('deadTime').value = toLocalISO(dead);
-    document.getElementById('expTime').value = toLocalISO(exp);
+    // Adjust storage temperature default
+    const tempSelect = document.getElementById('storageTempSelect');
+    if (cat === 'prepared_food') {
+        tempSelect.value = 'Hot Holding (above 60°C)';
+    } else {
+        tempSelect.value = 'Ambient Room Temperature';
+    }
+
+    // Show/hide prep time & temp reading for prepared food only
+    document.getElementById('prepTimeField').classList.toggle('d-none', cat !== 'prepared_food');
+    document.getElementById('tempReadingField').classList.toggle('d-none', cat !== 'prepared_food');
+
+    // Update food name placeholder
+    const hints = {
+        prepared_food: 'e.g. Paneer Butter Masala, Dal Fry, Veg Biryani',
+        fresh_produce: 'e.g. Mixed Vegetable Box, Alphonso Mangoes, Spinach Bundle',
+        raw_ingredients: 'e.g. 50 kg Basmati Rice, 25 kg Toor Dal, Wheat Flour Bags'
+    };
+    document.getElementById('foodName').placeholder = hints[cat] || hints.prepared_food;
+
+    // Update expiry label
+    const expiryLabels = {
+        prepared_food: 'Food Expiry Time *',
+        fresh_produce: 'Freshness Window Ends *',
+        raw_ingredients: 'Best-Before / Expiry Date *'
+    };
+    document.getElementById('expiryLabel').textContent = expiryLabels[cat] || 'Expiry *';
+
+    // Update timing hint
+    const timingHints = {
+        prepared_food: 'Hot food must be collected within 2–4 hours. Accuracy is mandatory for safety.',
+        fresh_produce: 'Fresh produce should be collected within 24–48 hours for peak quality.',
+        raw_ingredients: 'Staples can be collected within days. Provide best-before date if available.'
+    };
+    document.getElementById('timingHint').textContent = timingHints[cat] || '';
+
+    // Set default timing values based on category
+    const now = new Date();
+    const toLocalISO = d => { const off = d.getTimezoneOffset() * 60000; return new Date(d.getTime() - off).toISOString().slice(0, 16); };
+    const expiryOffsets = { prepared_food: 6, fresh_produce: 72, raw_ingredients: 720 };
+    const deadOffsets   = { prepared_food: 2, fresh_produce: 24, raw_ingredients: 72 };
+
+    document.getElementById('deadTime').value = toLocalISO(new Date(now.getTime() + (deadOffsets[cat] || 2) * 3600000));
+    document.getElementById('expTime').value  = toLocalISO(new Date(now.getTime() + (expiryOffsets[cat] || 6) * 3600000));
+    if (cat === 'prepared_food') {
+        document.getElementById('prepTime').value = toLocalISO(new Date(now.getTime() - 3600000));
+    }
+    if (cat === 'raw_ingredients') {
+        document.getElementById('packagingType').value = 'Factory sealed bags / Jute sacks';
+    } else if (cat === 'fresh_produce') {
+        document.getElementById('packagingType').value = 'Ventilated crates / open baskets';
+    } else {
+        document.getElementById('packagingType').value = 'Food-grade sealed containers';
+    }
 }
 
 function goToStep(step) {
-    // Validate current pane before proceeding
+    // On move to step 2+, apply category-specific UI
+    if (step >= 2) applyCategory(selectedCategory);
+
     for (let i = 1; i <= 6; i++) {
         const pane = document.getElementById(`wizardPane${i}`);
-        const indicator = document.getElementById(`stepIndicator${i}`);
+        const ind  = document.getElementById(`stepIndicator${i}`);
         if (i === step) {
             pane.classList.remove('d-none');
-            indicator.className = 'wizard-step active';
+            ind.className = 'wizard-step active';
         } else if (i < step) {
             pane.classList.add('d-none');
-            indicator.className = 'wizard-step completed';
+            ind.className = 'wizard-step completed';
         } else {
             pane.classList.add('d-none');
-            indicator.className = 'wizard-step';
+            ind.className = 'wizard-step';
         }
     }
 
     if (step === 6) {
-        document.getElementById('revFood').textContent = document.getElementById('foodName').value || 'Unspecified';
-        document.getElementById('revCat').textContent = document.getElementById('foodCategory').value;
+        const typeLabels = {prepared_food: '🍲 Prepared Food', fresh_produce: '🥦 Fresh Produce', raw_ingredients: '🌾 Raw Ingredients'};
+        const catSelMap = {prepared_food: 'prepCategory', fresh_produce: 'produceCategory', raw_ingredients: 'rawCategory'};
+        document.getElementById('revType').textContent = typeLabels[selectedCategory] || selectedCategory;
+        document.getElementById('revFood').textContent = document.getElementById('foodName').value || '—';
+        const catEl = document.getElementById(catSelMap[selectedCategory]);
+        document.getElementById('revCat').textContent = catEl ? catEl.options[catEl.selectedIndex]?.text : '—';
         document.getElementById('revQty').textContent = `${document.getElementById('foodQty').value} ${document.getElementById('foodUnit').value}`;
         document.getElementById('revAddr').textContent = document.getElementById('pickupAddr').value;
     }
 
     if (window.lucide) window.lucide.createIcons();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-document.addEventListener('DOMContentLoaded', initDefaultTimings);
+document.addEventListener('DOMContentLoaded', () => {
+    selectDonationType('prepared_food');
+    // Initialize timing defaults for prepared food
+    const now = new Date();
+    const toLocalISO = d => { const off = d.getTimezoneOffset() * 60000; return new Date(d.getTime() - off).toISOString().slice(0, 16); };
+    document.getElementById('prepTime').value = toLocalISO(new Date(now.getTime() - 3600000));
+    document.getElementById('deadTime').value = toLocalISO(new Date(now.getTime() + 2 * 3600000));
+    document.getElementById('expTime').value  = toLocalISO(new Date(now.getTime() + 6 * 3600000));
+});
 </script>
 {% endblock %}

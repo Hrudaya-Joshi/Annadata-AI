@@ -14,6 +14,9 @@ def home():
         RescueMission.status.in_(['delivery_confirmed', 'completed'])
     ).order_by(RescueMission.delivery_time.desc()).limit(3).all()
 
+    # Featured active donations
+    featured_donations = FoodDonation.query.order_by(FoodDonation.created_at.desc()).limit(6).all()
+
     # Active network stats
     donor_count = Restaurant.query.count()
     ngo_count = NGO.query.count()
@@ -23,6 +26,7 @@ def home():
         'home.html',
         impact=impact_data,
         recent_missions=recent_missions,
+        featured_donations=featured_donations,
         donor_count=donor_count,
         ngo_count=ngo_count,
         volunteer_count=volunteer_count

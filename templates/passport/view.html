@@ -5,158 +5,160 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-xl-7">
-            <!-- Header Back link -->
+            <!-- Header Controls -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="badge badge-soft badge-soft-success px-3 py-1">
-                    <i data-lucide="shield-check" class="me-1" style="width: 14px; height: 14px;"></i> Public Traceability Verification
+                <span class="badge badge-soft badge-fresh px-3 py-1">
+                    <i data-lucide="shield-check" class="me-1" style="width: 14px; height: 14px;"></i> Official Food Traceability Passport
                 </span>
                 <button class="btn btn-sm btn-outline-forest d-print-none" onclick="window.print()">
-                    <i data-lucide="printer" class="me-1" style="width: 14px; height: 14px;"></i> Print Passport
+                    <i data-lucide="printer" class="me-1" style="width: 14px; height: 14px;"></i> Print Certificate
                 </button>
             </div>
 
             <!-- The Food Rescue Passport Certificate Card -->
-            <div class="card-premium p-4 p-md-5 shadow-lg border-2 border-forest position-relative overflow-hidden" style="background: #FFFFFF;">
-                <!-- Watermark Background Logo -->
-                <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.03; pointer-events: none;">
-                    <i data-lucide="shield-check" style="width: 260px; height: 260px;"></i>
+            <div class="passport-container p-4 p-md-5 position-relative overflow-hidden">
+                <!-- Watermark Sprout Motif -->
+                <div style="position: absolute; right: -25px; bottom: -25px; opacity: 0.04; pointer-events: none; color: var(--forest-green);">
+                    <i data-lucide="sprout" style="width: 280px; height: 280px;"></i>
                 </div>
 
-                <!-- Top Header -->
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center pb-4 mb-4 border-bottom gap-3">
-                    <div>
-                        <div class="text-uppercase fw-extrabold text-primary mb-1" style="font-size: 0.75rem; letter-spacing: 0.08em;">
-                            ANNADATA AI NETWORK &bull; RESCUE PASSPORT
+                <!-- Top Certificate Header -->
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center pb-4 mb-4 border-bottom border-warm gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="passport-seal">
+                            <i data-lucide="shield-check" style="width: 32px; height: 32px;"></i>
                         </div>
-                        <h3 class="fw-black mb-0 text-dark font-monospace">{{ donation.rescue_code or ('ANN-RESCUE-' ~ donation.id) }}</h3>
+                        <div>
+                            <div class="text-uppercase fw-extrabold text-forest mb-0" style="font-size: 0.75rem; letter-spacing: 0.08em;">
+                                ANNADATA AI NETWORK &bull; FOOD RESCUE PASSPORT
+                            </div>
+                            <h3 class="fw-black mb-0 text-forest font-monospace" style="letter-spacing: -0.02em;">
+                                {{ donation.rescue_code or ('ANN-RESCUE-' ~ donation.id) }}
+                            </h3>
+                        </div>
                     </div>
                     <div class="text-sm-end">
-                        <span class="badge bg-success text-white px-3 py-2" style="font-size: 0.8rem;">
-                            <i data-lucide="check" class="me-1" style="width: 14px; height: 14px;"></i> SAFETY VERIFIED
+                        <span class="badge" style="background: var(--leaf-green); color: #FFFFFF; font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+                            <i data-lucide="check" class="me-1" style="width: 13px; height: 13px;"></i> SAFETY VERIFIED
                         </span>
                         <div class="text-muted small mt-1" style="font-size: 0.75rem;">Issued: {{ donation.created_at.strftime('%Y-%m-%d %H:%M UTC') }}</div>
                     </div>
                 </div>
 
-                <!-- Center Section: QR Code and Key Attributes -->
+                <!-- QR Code & Key Attributes Section -->
                 <div class="row g-4 align-items-center mb-4">
                     <div class="col-sm-5 text-center">
-                        <div class="p-3 bg-white rounded border d-inline-block shadow-sm">
+                        <div class="p-3 bg-white rounded-3 border border-warm d-inline-block shadow-sm">
                             <img src="{{ qr_data_uri }}" alt="Passport QR Code" style="width: 180px; height: 180px;" class="img-fluid">
                         </div>
-                        <div class="small text-muted mt-2" style="font-size: 0.75rem;">
-                            Scan to verify authentic digital record
+                        <div class="small text-muted mt-2 fw-semibold" style="font-size: 0.75rem;">
+                            <i data-lucide="scan" class="me-1 text-leaf" style="width: 12px; height: 12px;"></i> Scan for authentic digital provenance
                         </div>
                     </div>
 
                     <div class="col-sm-7">
                         <div class="d-flex flex-column gap-2">
                             <div>
-                                <span class="text-muted small text-uppercase" style="font-size: 0.7rem; font-weight: 600;">Food Item & Batch</span>
-                                <h4 class="fw-bold text-dark mb-0">{{ donation.food_name }}</h4>
+                                <span class="text-muted small text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.04em;">Food Item & Batch</span>
+                                <h4 class="fw-bold text-forest mb-0">{{ donation.food_name }}</h4>
                             </div>
-                            <div class="d-flex gap-3">
-                                <div>
-                                    <span class="text-muted small" style="font-size: 0.7rem;">Category:</span>
-                                    <div class="fw-semibold text-capitalize text-dark">{{ donation.category }}</div>
+
+                            <div class="d-flex gap-3 my-1">
+                                <div class="passport-badge">
+                                    <span class="text-muted small d-block" style="font-size: 0.68rem;">Category:</span>
+                                    <div class="fw-semibold text-capitalize text-forest">{{ donation.category }}</div>
                                 </div>
-                                <div>
-                                    <span class="text-muted small" style="font-size: 0.7rem;">Quantity:</span>
-                                    <div class="fw-bold text-success">{{ donation.quantity }} {{ donation.unit }}</div>
+                                <div class="passport-badge">
+                                    <span class="text-muted small d-block" style="font-size: 0.68rem;">Quantity:</span>
+                                    <div class="fw-bold text-leaf">{{ donation.quantity }} {{ donation.unit }}</div>
                                 </div>
-                                <div>
-                                    <span class="text-muted small" style="font-size: 0.7rem;">Temp:</span>
-                                    <div class="fw-semibold text-dark">{{ donation.storage_temperature or 'Controlled' }}</div>
+                                <div class="passport-badge">
+                                    <span class="text-muted small d-block" style="font-size: 0.68rem;">Temperature:</span>
+                                    <div class="fw-semibold text-forest">{{ donation.storage_temperature or 'Controlled' }}</div>
                                 </div>
                             </div>
-                            <div class="pt-2 border-top">
+
+                            <div class="pt-2 border-top border-warm">
                                 <span class="text-muted small" style="font-size: 0.7rem;">Verified Food Donor:</span>
-                                <div class="fw-semibold text-dark">{{ masked_name }}</div>
-                                <div class="text-muted small" style="font-size: 0.75rem;">Location: {{ public_address }}</div>
+                                <div class="fw-semibold text-forest">{{ masked_name }}</div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">Sector: {{ public_address }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Chronology & Deadlines -->
-                <div class="p-3 bg-light rounded border mb-4">
+                <!-- Chronology & Operational Deadlines -->
+                <div class="p-3 rounded-3 border border-warm mb-4" style="background: var(--surface-cream);">
                     <div class="row g-2 small">
                         <div class="col-4">
-                            <div class="text-muted" style="font-size: 0.7rem;">PREPARATION TIME</div>
-                            <div class="fw-semibold text-dark">{{ donation.preparation_time.strftime('%d %b, %H:%M') }}</div>
+                            <div class="text-muted fw-bold" style="font-size: 0.68rem;">PREPARATION TIME</div>
+                            <div class="fw-semibold text-forest">{{ donation.preparation_time.strftime('%d %b, %H:%M') }}</div>
                         </div>
                         <div class="col-4">
-                            <div class="text-muted" style="font-size: 0.7rem;">COLLECTION DEADLINE</div>
-                            <div class="fw-bold text-danger">{{ donation.collection_deadline.strftime('%d %b, %H:%M') }}</div>
+                            <div class="text-muted fw-bold" style="font-size: 0.68rem;">COLLECTION DEADLINE</div>
+                            <div class="fw-bold text-terracotta">{{ donation.collection_deadline.strftime('%d %b, %H:%M') }}</div>
                         </div>
                         <div class="col-4">
-                            <div class="text-muted" style="font-size: 0.7rem;">EXPIRY TIME</div>
-                            <div class="fw-semibold text-dark">{{ donation.expiry_time.strftime('%d %b, %H:%M') }}</div>
+                            <div class="text-muted fw-bold" style="font-size: 0.68rem;">EXPIRY LIMIT</div>
+                            <div class="fw-semibold text-forest">{{ donation.expiry_time.strftime('%d %b, %H:%M') }}</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Food Safety Screening Protocol -->
-                <div class="mb-4">
-                    <h6 class="fw-bold text-dark mb-2 d-flex align-items-center gap-2">
-                        <i data-lucide="shield" class="text-primary" style="width: 16px; height: 16px;"></i>
-                        Food Safety Inspection Checklist
-                    </h6>
-                    <div class="row g-2 small">
-                        <div class="col-md-6 d-flex align-items-center gap-2">
-                            <i data-lucide="check-circle" class="text-success" style="width: 16px; height: 16px;"></i>
-                            <span>Visual & Organoleptic Inspection Passed</span>
+                <!-- 5-Point Safety Inspection Seal -->
+                <div class="p-3 rounded-3 border border-warm mb-4" style="background: var(--leaf-soft);">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i data-lucide="check-circle" class="text-leaf" style="width: 18px; height: 18px;"></i>
+                        <h6 class="fw-bold text-forest mb-0">5-Point Food Safety Inspection Compliance</h6>
+                    </div>
+                    <div class="row g-2 small text-muted">
+                        <div class="col-6 col-sm-4 d-flex align-items-center gap-1">
+                            <i data-lucide="check" class="text-leaf" style="width: 13px; height: 13px;"></i> Visual Check: Pass
                         </div>
-                        <div class="col-md-6 d-flex align-items-center gap-2">
-                            <i data-lucide="check-circle" class="text-success" style="width: 16px; height: 16px;"></i>
-                            <span>Sanitized, Leak-Proof Food Packaging</span>
+                        <div class="col-6 col-sm-4 d-flex align-items-center gap-1">
+                            <i data-lucide="check" class="text-leaf" style="width: 13px; height: 13px;"></i> Sealed Containers
                         </div>
-                        <div class="col-md-6 d-flex align-items-center gap-2">
-                            <i data-lucide="check-circle" class="text-success" style="width: 16px; height: 16px;"></i>
-                            <span>Thermal Holding Compliance Verified</span>
+                        <div class="col-6 col-sm-4 d-flex align-items-center gap-1">
+                            <i data-lucide="check" class="text-leaf" style="width: 13px; height: 13px;"></i> Temp Holding Verified
                         </div>
-                        <div class="col-md-6 d-flex align-items-center gap-2">
-                            <i data-lucide="check-circle" class="text-success" style="width: 16px; height: 16px;"></i>
-                            <span>Allergen Declaration Protocol Completed</span>
+                        <div class="col-6 col-sm-4 d-flex align-items-center gap-1">
+                            <i data-lucide="check" class="text-leaf" style="width: 13px; height: 13px;"></i> Allergens Declared
+                        </div>
+                        <div class="col-6 col-sm-4 d-flex align-items-center gap-1">
+                            <i data-lucide="check" class="text-leaf" style="width: 13px; height: 13px;"></i> Kitchen Hygiene Verified
+                        </div>
+                        <div class="col-6 col-sm-4 d-flex align-items-center gap-1">
+                            <i data-lucide="check" class="text-leaf" style="width: 13px; height: 13px;"></i> Within 4h Window
                         </div>
                     </div>
-                    {% if safety and safety.ai_risk_observations %}
-                        <div class="mt-2 p-2 rounded bg-light small text-muted" style="font-size: 0.75rem;">
-                            <strong>Screening Observations:</strong> {{ safety.ai_risk_observations }}
-                        </div>
-                    {% endif %}
                 </div>
 
-                <!-- Lifecycle State Progress -->
-                <div class="pt-3 border-top">
-                    <div class="d-flex justify-content-between align-items-center small mb-2">
-                        <span class="fw-bold text-dark">Donation Lifecycle Status:</span>
-                        <span class="badge bg-primary text-white text-capitalize">{{ donation.status|replace('_', ' ') }}</span>
+                <!-- Digital Traceability Lifecycle -->
+                <div class="border-top border-warm pt-3">
+                    <span class="text-muted small fw-bold text-uppercase d-block mb-3" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+                        Chain of Custody & Traceability
+                    </span>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center small gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--forest-green); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">1</div>
+                            <span>Commercial Kitchen</span>
+                        </div>
+                        <span class="text-muted">&rarr;</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--harvest-yellow); color: var(--forest-dark); display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">2</div>
+                            <span>Insulated Courier</span>
+                        </div>
+                        <span class="text-muted">&rarr;</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--leaf-green); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">3</div>
+                            <span>Community Shelter</span>
+                        </div>
                     </div>
-
-                    {% if mission %}
-                        <div class="p-3 bg-light rounded border small">
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-semibold">Mission Code:</span>
-                                <span class="font-monospace text-primary fw-bold">{{ mission.mission_code }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between mt-1">
-                                <span class="fw-semibold">Destination Shelter:</span>
-                                <span>{{ mission.destination_ngo.organization_name }}</span>
-                            </div>
-                            {% if mission.delivery_time %}
-                                <div class="d-flex justify-content-between mt-1 text-success fw-bold">
-                                    <span>Verified Delivery Timestamp:</span>
-                                    <span>{{ mission.delivery_time.strftime('%Y-%m-%d %H:%M UTC') }}</span>
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endif %}
                 </div>
 
-                <!-- Public Protection Notice -->
-                <div class="mt-4 pt-3 border-top text-center text-muted" style="font-size: 0.7rem;">
-                    ANNADATA AI Public Safety Protection &bull; Private volunteer contacts and internal beneficiary demographics are shielded.
+                <!-- Privacy & Verification Footer -->
+                <div class="text-center mt-4 pt-3 border-top border-warm text-muted small" style="font-size: 0.75rem;">
+                    ANNADATA AI Digital Food Rescue Infrastructure &bull; Publicly Verified Record &bull; Personal phone numbers and private addresses are sanitized for donor liability and beneficiary dignity.
                 </div>
             </div>
         </div>

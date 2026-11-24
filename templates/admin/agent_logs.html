@@ -1,63 +1,163 @@
 {% extends "base.html" %}
-{% block title %}AI Agent Execution Diagnostic Logs — ANNADATA AI{% endblock %}
+{% block title %}AI Agent Execution Diagnostic Console — ANNADATA AI{% endblock %}
 
 {% block content %}
 <div class="container-fluid px-lg-5 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1">AI Agent Diagnostic Trail</h3>
-            <p class="text-muted small mb-0">Runtime logs, input prompts, tool telemetry, and failure traces for all platform agents</p>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge badge-soft badge-fresh">Autonomous Intelligence Engine</span>
+                <span class="text-muted small">&bull; Runtime Diagnostics & Traceability</span>
+            </div>
+            <h3 class="fw-bold text-forest mb-0">AI Agent Diagnostic Console</h3>
+            <p class="text-muted small mb-0">Runtime logs, input prompts, tool execution telemetry, and failure traces for all 6 autonomous agents</p>
         </div>
-        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-forest btn-sm">
-            &larr; Admin Center
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-forest btn-sm">
+                &larr; Operations Center
+            </a>
+            <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-forest btn-sm">
+                System Audit Logs
+            </a>
+        </div>
     </div>
 
-    <div class="card-premium">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 small">
-                <thead class="table-light">
-                    <tr class="text-muted">
-                        <th>Timestamp</th>
-                        <th>Agent Name</th>
-                        <th>Task / Tool</th>
-                        <th>Donation ID</th>
-                        <th>Status</th>
-                        <th>Input Data</th>
-                        <th>Output / Errors</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if logs %}
-                        {% for l in logs %}
-                            <tr>
-                                <td class="text-muted font-monospace">{{ l.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                <td class="fw-bold text-dark">{{ l.agent_name }}</td>
-                                <td><span class="badge badge-soft badge-soft-primary font-monospace">{{ l.task }}</span></td>
-                                <td>{{ '#' ~ l.donation_id if l.donation_id else '-' }}</td>
-                                <td>
-                                    {% if l.status == 'success' %}
-                                        <span class="badge badge-soft badge-soft-success">Success</span>
-                                    {% else %}
-                                        <span class="badge badge-soft badge-soft-danger">Failed</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-truncate font-monospace" style="max-width: 220px;" title="{{ l.input_data }}">
-                                    {{ l.input_data or '-' }}
-                                </td>
-                                <td class="text-truncate font-monospace {% if l.error_message %}text-danger fw-semibold{% endif %}" style="max-width: 280px;" title="{{ l.error_message or l.output_data }}">
-                                    {{ l.error_message or l.output_data or '-' }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">No agent execution logs found.</td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
+    <!-- Dark Forest-Green Console Window -->
+    <div class="agent-console">
+        <!-- Terminal Titlebar -->
+        <div class="agent-console-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="agent-console-dots">
+                    <span class="agent-console-dot red"></span>
+                    <span class="agent-console-dot yellow"></span>
+                    <span class="agent-console-dot green"></span>
+                </div>
+                <span class="small fw-bold text-cream" style="font-size: 0.8rem; letter-spacing: 0.05em;">
+                    ANNADATA-AI://agent-runtime/telemetry.stream [{{ logs|length }} Total Execution Records]
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-forest text-cream border border-success" style="font-size: 0.7rem;">Live Deterministic Trace</span>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="p-3 border-bottom border-secondary border-opacity-25 d-flex flex-wrap gap-2 align-items-center" style="background-color: #122218;">
+            <span class="small text-muted me-2 font-monospace" style="font-size: 0.75rem;">FILTER AGENT:</span>
+            <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 active font-monospace" style="font-size: 0.75rem;" onclick="filterLogs('all')">ALL</button>
+            <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 font-monospace" style="font-size: 0.75rem;" onclick="filterLogs('FoodAnalysisAgent')">FoodAnalysisAgent</button>
+            <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 font-monospace" style="font-size: 0.75rem;" onclick="filterLogs('NGOMatchingAgent')">NGOMatchingAgent</button>
+            <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 font-monospace" style="font-size: 0.75rem;" onclick="filterLogs('CoordinationAgent')">CoordinationAgent</button>
+            <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 font-monospace" style="font-size: 0.75rem;" onclick="filterLogs('SurplusPredictionAgent')">SurplusPredictionAgent</button>
+            <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 font-monospace" style="font-size: 0.75rem;" onclick="filterLogs('ImpactAnalyticsAgent')">ImpactAnalyticsAgent</button>
+            <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 font-monospace" style="font-size: 0.75rem;" onclick="filterLogs('RescueAssistantAgent')">RescueAssistantAgent</button>
+        </div>
+
+        <!-- Console Stream Body -->
+        <div class="agent-console-body">
+            {% if logs %}
+                {% for l in logs %}
+                    <div class="json-record log-item" data-agent="{{ l.agent_name }}">
+                        <!-- Execution Header Line -->
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-2 pb-2 border-bottom border-secondary border-opacity-25">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="badge" style="background-color: #F2B544; color: #16281E; font-weight: 800; font-size: 0.75rem;">
+                                    {{ l.agent_name }}
+                                </span>
+                                <span class="text-white fw-bold font-monospace small">&bull; TASK: {{ l.task }}</span>
+                                {% if l.donation_id %}
+                                    <span class="badge bg-secondary font-monospace" style="font-size: 0.7rem;">Donation #{{ l.donation_id }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small font-monospace">{{ l.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</span>
+                                {% if l.status == 'success' %}
+                                    <span class="badge" style="background-color: #79A85A; color: #16281E; font-weight: 700; font-size: 0.7rem;">STATUS: SUCCESS</span>
+                                {% else %}
+                                    <span class="badge" style="background-color: #E87946; color: #FFFFFF; font-weight: 700; font-size: 0.7rem;">STATUS: FAILED</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- JSON Telemetry Grids -->
+                        <div class="row g-3">
+                            <!-- Input JSON Payload -->
+                            <div class="col-md-6">
+                                <div class="small text-muted font-monospace mb-1" style="font-size: 0.75rem; color: #9AA7A0;">
+                                    &gt; INPUT_PAYLOAD (Variables & Parameters):
+                                </div>
+                                <pre class="p-2 rounded mb-0 text-wrap json-display" style="background-color: #122218; border: 1px solid #234331; font-size: 0.8rem; max-height: 220px; overflow-y: auto;"><code>{{ l.input_data or '{}' }}</code></pre>
+                            </div>
+
+                            <!-- Output / Error JSON Payload -->
+                            <div class="col-md-6">
+                                <div class="small text-muted font-monospace mb-1" style="font-size: 0.75rem; color: {% if l.error_message %}#FFAA80{% else %}#A8E387{% endif %};">
+                                    &gt; {% if l.error_message %}ERROR_TRACEBACK{% else %}OUTPUT_TELEMETRY (Tool Results){% endif %}:
+                                </div>
+                                <pre class="p-2 rounded mb-0 text-wrap json-display" style="background-color: #122218; border: 1px solid #234331; font-size: 0.8rem; max-height: 220px; overflow-y: auto; color: {% if l.error_message %}#FF8C66{% else %}#A8E387{% endif %};"><code>{{ l.error_message or l.output_data or '{}' }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 text-muted font-monospace">
+                    [NO_LOGS_FOUND] Autonomous agents have not recorded runtime execution events yet.
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<script>
+function filterLogs(agentName) {
+    const items = document.querySelectorAll('.log-item');
+    items.forEach(el => {
+        if (agentName === 'all' || el.getAttribute('data-agent') === agentName) {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    });
+
+    const buttons = document.querySelectorAll('.border-bottom button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+// Format JSON strings in code blocks on page load
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.json-display code').forEach(block => {
+        const text = block.textContent.trim();
+        try {
+            const parsed = JSON.parse(text);
+            block.innerHTML = syntaxHighlightJson(parsed);
+        } catch (e) {
+            // Keep plain string if not valid JSON
+        }
+    });
+});
+
+function syntaxHighlightJson(json) {
+    if (typeof json !== 'string') {
+        json = JSON.stringify(json, undefined, 2);
+    }
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        let cls = 'json-number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'json-key';
+            } else {
+                cls = 'json-string';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'json-bool';
+        } else if (/null/.test(match)) {
+            cls = 'json-null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+    });
+}
+</script>
 {% endblock %}
