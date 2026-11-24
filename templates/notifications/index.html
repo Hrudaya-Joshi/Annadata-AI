@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Notifications — ANNADATA AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">Notifications & Network Alerts</h3>
+                    <p class="text-muted small mb-0">System updates, emergency rescue notifications, and mission progress alerts</p>
+                </div>
+                <form method="POST" action="{{ url_for('notifications.mark_all_read') }}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <i data-lucide="check-check" class="me-1" style="width: 14px; height: 14px;"></i> Mark All Read
+                    </button>
+                </form>
+            </div>
+
+            <div class="card-premium">
+                {% if notifications %}
+                    <div class="list-group list-group-flush">
+                        {% for n in notifications %}
+                            <div class="list-group-item p-3 d-flex align-items-start gap-3 {% if not n.is_read %}bg-light{% endif %}">
+                                <div style="width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+                                    {% if n.category == 'urgent' %}background: #FEE2E2; color: #DC2626;
+                                    {% elif n.category == 'success' %}background: #D1FAE5; color: #059669;
+                                    {% else %}background: #E0F2FE; color: #0284C7;{% endif %}">
+                                    {% if n.category == 'urgent' %}
+                                        <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i>
+                                    {% elif n.category == 'success' %}
+                                        <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+                                    {% else %}
+                                        <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
+                                    {% endif %}
+                                </div>
+
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="fw-bold text-dark">{{ n.title }}</div>
+                                        <span class="text-muted" style="font-size: 0.75rem;">{{ n.created_at.strftime('%d %b, %H:%M') }}</span>
+                                    </div>
+                                    <div class="small text-muted mt-1">{{ n.message }}</div>
+                                    {% if n.link_url %}
+                                        <div class="mt-2">
+                                            <a href="{{ n.link_url }}" class="small text-primary fw-semibold text-decoration-none">View Details &rarr;</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i data-lucide="bell-off" class="mb-2" style="width: 36px; height: 36px; opacity: 0.4;"></i>
+                        <div class="fw-semibold">No notifications yet</div>
+                        <div class="small">You're all caught up! Updates about your donations and missions will appear here.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

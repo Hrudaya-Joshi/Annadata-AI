@@ -1,0 +1,1 @@
+# Service layer: llm_service.py (OpenRouter wrapper).

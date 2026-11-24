@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ANNADATA AI — Intelligent Food Rescue & Community Impact Network{% endblock %}</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Custom Design System -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-annadata">
+    <div class="container-fluid px-lg-4">
+        <a class="brand-logo" href="{{ url_for('main.home') }}">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: var(--accent);">
+                <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+            </div>
+            <span>ANNADATA <span style="color: var(--secondary);">AI</span></span>
+            <span class="brand-badge d-none d-sm-inline">Rescue Net</span>
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <i data-lucide="menu" style="width: 24px; height: 24px; color: var(--primary);"></i>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto ms-lg-4">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('intelligence.intelligence_center') }}">AI Intelligence</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('impact.impact_dashboard') }}">Impact Analytics</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('map.view_map') }}">Rescue Map</a>
+                </li>
+
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('missions.list_missions') }}">Missions</a>
+                    </li>
+
+                    {% if current_user.role == 'restaurant' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-primary fw-semibold" href="{{ url_for('restaurant.dashboard') }}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('restaurant.donate') }}">
+                                <i data-lucide="plus-circle" class="me-1" style="width: 14px; height: 14px;"></i> Donate Food
+                            </a>
+                        </li>
+                    {% elif current_user.role == 'ngo' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-primary fw-semibold" href="{{ url_for('ngo.dashboard') }}">NGO Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('ngo.donations') }}">Requests</a>
+                        </li>
+                    {% elif current_user.role == 'volunteer' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-primary fw-semibold" href="{{ url_for('volunteer.dashboard') }}">Dispatch Hub</a>
+                        </li>
+                    {% elif current_user.role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-danger fw-semibold" href="{{ url_for('admin.dashboard') }}">Admin Center</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+
+            <ul class="navbar-nav ms-auto align-items-center">
+                {% if current_user.is_authenticated %}
+                    <!-- Notifications -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link position-relative p-2" href="{{ url_for('notifications.index') }}" title="Notifications">
+                            <i data-lucide="bell" style="width: 20px; height: 20px; color: var(--text-muted);"></i>
+                            {% if unread_notifications > 0 %}
+                                <span class="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                    {{ unread_notifications }}
+                                </span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <!-- User Account Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--surface-alt); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary);">
+                                {{ current_user.full_name[:1].upper() }}
+                            </div>
+                            <span class="d-none d-md-inline fw-semibold text-dark" style="font-size: 0.875rem;">{{ current_user.full_name }}</span>
+                            <span class="badge badge-soft badge-soft-success text-capitalize">{{ current_user.role }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="border-radius: var(--radius-md);">
+                            <li class="px-3 py-2 border-bottom">
+                                <div class="fw-bold text-dark">{{ current_user.full_name }}</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">{{ current_user.email }}</div>
+                            </li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('profile.index') }}"><i data-lucide="settings" class="me-2" style="width: 16px; height: 16px;"></i> Settings</a></li>
+                            {% if current_user.role == 'admin' %}
+                                <li><a class="dropdown-item py-2" href="{{ url_for('admin.agent_logs') }}"><i data-lucide="cpu" class="me-2" style="width: 16px; height: 16px;"></i> AI Agent Logs</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('admin.audit_logs') }}"><i data-lucide="file-text" class="me-2" style="width: 16px; height: 16px;"></i> Audit Trail</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}" data-confirm="Are you sure you want to log out?"><i data-lucide="log-out" class="me-2" style="width: 16px; height: 16px;"></i> Sign Out</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item me-2">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">Sign In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-forest btn-sm" href="{{ url_for('auth.register') }}">Join Network</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Flash Alert Messages Container -->
+<div class="container-fluid px-lg-4 mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert" style="border-radius: var(--radius-sm);">
+                    <i data-lucide="info" class="me-2" style="width: 18px; height: 18px;"></i>
+                    <div>{{ message }}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+
+<!-- Main Body Content -->
+<main class="flex-grow-1">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Floating AI Assistant ("Annadata Intelligence") -->
+<div class="assistant-trigger" id="assistantTrigger" title="Ask Annadata Intelligence">
+    <i data-lucide="sparkles" style="width: 24px; height: 24px;"></i>
+</div>
+
+<div class="assistant-panel" id="assistantPanel">
+    <div class="assistant-header">
+        <div class="d-flex align-items-center gap-2">
+            <div style="width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="bot" style="width: 18px; height: 18px;"></i>
+            </div>
+            <div>
+                <div class="fw-bold" style="font-size: 0.95rem;">Annadata Intelligence</div>
+                <div style="font-size: 0.7rem; opacity: 0.85;">Role-Aware Food Rescue AI</div>
+            </div>
+        </div>
+        <button class="btn btn-sm text-white border-0" id="assistantClose"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+    </div>
+
+    <!-- Suggested Role Pills -->
+    <div class="px-3 pt-2 pb-1 border-bottom d-flex gap-1 overflow-auto" style="white-space: nowrap; background: #fff;">
+        {% if current_user.is_authenticated %}
+            {% if current_user.role == 'restaurant' %}
+                <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">When should I donate surplus food?</span>
+                <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">Show my donation performance</span>
+            {% elif current_user.role == 'ngo' %}
+                <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">Show urgent nearby donations</span>
+                <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">What is our capacity status?</span>
+            {% elif current_user.role == 'volunteer' %}
+                <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">What is my next assigned mission?</span>
+                <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">Explain collection instructions</span>
+            {% elif current_user.role == 'admin' %}
+                <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">Summarize platform performance</span>
+                <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">Which missions are delayed?</span>
+            {% endif %}
+        {% else %}
+            <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">How does food matching work?</span>
+            <span class="badge badge-soft badge-soft-secondary prompt-pill cursor-pointer">What is the Food Rescue Passport?</span>
+        {% endif %}
+    </div>
+
+    <div class="assistant-messages" id="assistantMessages">
+        <div class="chat-bubble assistant">
+            Hello{% if current_user.is_authenticated %}, {{ current_user.full_name }}{% endif %}! I am <strong>Annadata Intelligence</strong>. I can assist with surplus predictions, real-time mission updates, safety screening questions, and allocation analytics.
+        </div>
+    </div>
+
+    <div class="assistant-input-area">
+        <input type="text" class="form-control form-control-sm" id="assistantInput" placeholder="Ask a question..." autocomplete="off">
+        <button class="btn btn-forest btn-sm px-3" id="assistantSend"><i data-lucide="send" style="width: 16px; height: 16px;"></i></button>
+    </div>
+</div>
+
+<!-- Global Footer -->
+<footer class="footer-annadata">
+    <div class="container-fluid px-lg-5">
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div style="width: 28px; height: 28px; border-radius: 6px; background: var(--secondary); display: flex; align-items: center; justify-content: center; color: white;">
+                        <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <span class="fw-bold text-white fs-5">ANNADATA AI</span>
+                </div>
+                <p style="font-size: 0.85rem; line-height: 1.6;">
+                    Intelligent Food Rescue & Community Impact Network connecting surplus food donors, certified NGOs, and volunteer couriers via predictive AI, verified safety screening, and transparent QR passports.
+                </p>
+                <div class="text-warning small mt-2">
+                    <i data-lucide="award" class="me-1" style="width: 14px; height: 14px;"></i> Every Meal Matters. Every Rescue Counts.
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6 class="text-white text-uppercase mb-3" style="font-size: 0.8rem; letter-spacing: 0.05em;">Platform</h6>
+                <ul class="list-unstyled d-flex flex-column gap-2 small">
+                    <li><a href="{{ url_for('intelligence.intelligence_center') }}">AI Intelligence Center</a></li>
+                    <li><a href="{{ url_for('impact.impact_dashboard') }}">Impact Analytics</a></li>
+                    <li><a href="{{ url_for('map.view_map') }}">Food Rescue Map</a></li>
+                    <li><a href="{{ url_for('missions.list_missions') }}">Rescue Missions</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6 class="text-white text-uppercase mb-3" style="font-size: 0.8rem; letter-spacing: 0.05em;">Ecosystem</h6>
+                <ul class="list-unstyled d-flex flex-column gap-2 small">
+                    <li><a href="{{ url_for('auth.register') }}">For Restaurants & Kitchens</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">For NGOs & Shelters</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">For Volunteer Couriers</a></li>
+                    <li><a href="{{ url_for('auth.login') }}">Partner Portal</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4">
+                <h6 class="text-white text-uppercase mb-3" style="font-size: 0.8rem; letter-spacing: 0.05em;">Verification & Safety</h6>
+                <p class="small text-muted mb-2">
+                    Food safety is governed by deterministic health standards, physical container inspections, and human verification before dispatch. AI does not autonomously certify food safety.
+                </p>
+                <div class="p-2 rounded bg-dark border border-secondary border-opacity-25 small">
+                    <div class="text-light fw-semibold">Independent Deployment Architecture</div>
+                    <div style="font-size: 0.75rem; color: #8E9F97;">Zero proprietary runtime dependencies. 100% self-hosted local database & Python microservice.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-3 border-top border-secondary border-opacity-25 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small">
+            <div>&copy; 2026 ANNADATA AI Network. Final-Year Academic & Social Impact Software Architecture.</div>
+            <div class="text-muted">Standards: UNEP Food Waste Index &bull; FAO Environmental Benchmarks</div>
+        </div>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

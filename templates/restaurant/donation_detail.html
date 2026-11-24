@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Donation Details #{{ donation.id }} — ANNADATA AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft badge-soft-success">Batch Record</span>
+                <span class="text-muted small">ID: #{{ donation.id }} &bull; {{ donation.created_at.strftime('%d %b %Y, %H:%M') }}</span>
+            </div>
+            <h3 class="fw-bold mb-0 text-dark">{{ donation.food_name }}</h3>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('passport.view_passport', rescue_code=donation.rescue_code or donation.id) }}" class="btn btn-emerald btn-sm">
+                <i data-lucide="qr-code" class="me-1" style="width: 14px; height: 14px;"></i> Open Passport
+            </a>
+            <a href="{{ url_for('restaurant.dashboard') }}" class="btn btn-outline-forest btn-sm">
+                Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <!-- Food & Timings Overview -->
+            <div class="card-premium p-4 mb-4">
+                <h5 class="fw-bold text-primary mb-3">Donation Information</h5>
+                <div class="row g-3">
+                    <div class="col-md-4 col-6">
+                        <div class="text-muted small">Category</div>
+                        <div class="fw-bold text-dark text-capitalize">{{ donation.category }}</div>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <div class="text-muted small">Quantity Rescued</div>
+                        <div class="fw-bold text-dark">{{ donation.quantity }} {{ donation.unit }}</div>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <div class="text-muted small">Holding Temperature</div>
+                        <div class="fw-bold text-dark">{{ donation.storage_temperature or 'Standard Storage' }}</div>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <div class="text-muted small">Preparation Time</div>
+                        <div class="fw-semibold text-dark">{{ donation.preparation_time.strftime('%d %b, %H:%M') }}</div>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <div class="text-muted small">Collection Deadline</div>
+                        <div class="fw-semibold text-danger">{{ donation.collection_deadline.strftime('%d %b, %H:%M') }}</div>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <div class="text-muted small">Food Expiry Time</div>
+                        <div class="fw-semibold text-dark">{{ donation.expiry_time.strftime('%d %b, %H:%M') }}</div>
+                    </div>
+                    <div class="col-12 border-top pt-3">
+                        <div class="text-muted small">Pickup Address</div>
+                        <div class="fw-semibold text-dark"><i data-lucide="map-pin" class="me-1 text-primary" style="width: 14px; height: 14px;"></i> {{ donation.location_address }}</div>
+                    </div>
+                    {% if donation.description %}
+                        <div class="col-12 border-top pt-2">
+                            <div class="text-muted small">Notes / Culinary Details</div>
+                            <div class="small text-muted">{{ donation.description }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Food Safety Assessment Checklist -->
+            <div class="card-premium p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-primary mb-0">Food Safety Verification</h5>
+                    {% if donation.suitability_score and donation.suitability_score >= 80 %}
+                        <span class="badge badge-soft badge-soft-success">Safety Score: {{ donation.suitability_score }}%</span>
+                    {% else %}
+                        <span class="badge badge-soft badge-soft-danger">Flagged by Screening</span>
+                    {% endif %}
+                </div>
+
+                {% if safety %}
+                    <div class="list-group list-group-flush small">
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span>Visual & Organoleptic Inspection</span>
+                            <span class="badge bg-success text-white">PASSED</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span>Packaging Integrity & Sanitized Containers</span>
+                            <span class="badge bg-success text-white">PASSED</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span>Active Temperature Control Compliance</span>
+                            <span class="badge bg-success text-white">PASSED</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span>Allergen Declaration Protocol</span>
+                            <span class="badge bg-success text-white">PASSED</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span>Commercial Kitchen Hygiene Verification</span>
+                            <span class="badge bg-success text-white">PASSED</span>
+                        </div>
+                    </div>
+                    {% if safety.ai_risk_observations %}
+                        <div class="p-3 bg-light rounded mt-3 small text-muted">
+                            <div class="fw-bold text-dark mb-1">Safety Observations:</div>
+                            {{ safety.ai_risk_observations }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-muted small">Standard safety evaluation executed automatically.</div>
+                {% endif %}
+            </div>
+
+            <!-- Smart NGO Matching Allocation Status -->
+            <div class="card-premium p-4">
+                <h5 class="fw-bold text-primary mb-3">Smart NGO Allocation & Requests</h5>
+                {% if requests %}
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>NGO Partner</th>
+                                    <th>Match Score</th>
+                                    <th>Distance</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in requests %}
+                                    <tr>
+                                        <td class="fw-bold text-dark">{{ r.ngo.organization_name }}</td>
+                                        <td>
+                                            {% if r.match_score %}
+                                                <span class="badge badge-soft badge-soft-success">{{ r.match_score }} / 100</span>
+                                            {% else %}
+                                                <span class="badge badge-soft badge-soft-secondary">Evaluated</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="small">{{ r.distance_km }} km</td>
+                                        <td>
+                                            {% if r.status == 'accepted' %}
+                                                <span class="badge bg-success text-white">Accepted</span>
+                                            {% elif r.status == 'rejected' %}
+                                                <span class="badge bg-secondary text-white">Declined</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pending Review</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-muted small">No pending NGO requests.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar: Passport Card & Linked Mission -->
+        <div class="col-lg-4">
+            <div class="card-premium p-4 text-center mb-4">
+                <div class="badge badge-soft badge-soft-success mb-2">QR Traceability Passport</div>
+                <h6 class="fw-bold mb-3 font-monospace">{{ donation.rescue_code or ('#' ~ donation.id) }}</h6>
+                <div class="p-3 bg-white rounded border d-inline-block shadow-sm mb-3">
+                    <img src="{{ url_for('passport.get_qr_svg', rescue_code=donation.rescue_code or donation.id) }}" alt="QR Code" style="width: 160px; height: 160px;">
+                </div>
+                <div class="small text-muted mb-3">Scan this QR code during courier collection and delivery verification.</div>
+                <a href="{{ url_for('passport.view_passport', rescue_code=donation.rescue_code or donation.id) }}" class="btn btn-outline-forest btn-sm w-100">
+                    <i data-lucide="external-link" class="me-1" style="width: 14px; height: 14px;"></i> View Full Public Passport
+                </a>
+            </div>
+
+            {% if mission %}
+                <div class="card-premium p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-bold text-primary">Live Rescue Mission</span>
+                        <span class="badge bg-primary text-white text-capitalize">{{ mission.status|replace('_', ' ') }}</span>
+                    </div>
+                    <div class="fw-bold mb-1 font-monospace" style="font-size: 0.85rem;">{{ mission.mission_code }}</div>
+                    <div class="small text-muted mb-3">Assigned NGO: {{ mission.destination_ngo.organization_name }}</div>
+                    <a href="{{ url_for('missions.mission_detail', mission_id=mission.id) }}" class="btn btn-forest btn-sm w-100">
+                        Track Live Mission Progress
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

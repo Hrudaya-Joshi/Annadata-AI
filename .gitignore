@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+venv/
+.env
+*.db
+
+# Flask / Flask-SQLAlchemy
+instance/
+.webassets-cache
+
+# Environment variables
+.env
+!.env.example
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*~

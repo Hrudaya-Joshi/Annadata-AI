@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% block title %}NGO Command Center — ANNADATA AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft badge-soft-success">Verified NGO Partner</span>
+                <span class="text-muted small">&bull; Reg: {{ ngo.registration_number or 'Certified Partner' }}</span>
+            </div>
+            <h2 class="fw-bold mb-1">{{ ngo.organization_name }}</h2>
+            <div class="text-muted small"><i data-lucide="map-pin" class="me-1" style="width: 14px; height: 14px;"></i> {{ ngo.location_address }}</div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-forest px-3 py-2" data-bs-toggle="modal" data-bs-target="#demandModal">
+                <i data-lucide="plus" class="me-1" style="width: 16px; height: 16px;"></i> Log Community Meal Demand
+            </button>
+            <a href="{{ url_for('map.view_map') }}" class="btn btn-outline-forest px-3 py-2">
+                <i data-lucide="map" class="me-1" style="width: 16px; height: 16px;"></i> Active Rescue Map
+            </a>
+        </div>
+    </div>
+
+    <!-- Emergency Network Alerts Banner if active -->
+    {% if emergencies %}
+        <div class="alert alert-warning border shadow-sm mb-4 d-flex align-items-center gap-3">
+            <div style="width: 36px; height: 36px; border-radius: 8px; background: #FEF3C7; display: flex; align-items: center; justify-content: center; color: #D97706; flex-shrink: 0;">
+                <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="fw-bold text-dark">Emergency Food Rescue Alert ({{ emergencies|length }} Batches Near Deadline)</div>
+                <div class="small text-muted">Surplus food in your sector will expire within 2 hours. Review and accept rapidly to prevent waste.</div>
+            </div>
+            <a href="#incomingRequests" class="btn btn-sm btn-dark">Review Alerts</a>
+        </div>
+    {% endif %}
+
+    <!-- Metrics & Capacity Meter -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="metric-card primary">
+                <div class="metric-label">Pending Requests</div>
+                <div class="metric-value text-primary">{{ pending_requests|length }}</div>
+                <div class="text-muted small mt-1">Awaiting acceptance</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="metric-card">
+                <div class="metric-label">Active Missions</div>
+                <div class="metric-value text-success">{{ active_missions|length }}</div>
+                <div class="text-muted small mt-1">In courier transit</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="metric-card accent">
+                <div class="metric-label">Beneficiary Capacity</div>
+                <div class="metric-value text-dark">{{ ngo.capacity_people }} <span class="fs-6 fw-normal">servings</span></div>
+                <div class="text-muted small mt-1">{{ capacity_available }} remaining capacity</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="metric-card">
+                <div class="metric-label">Active Demands</div>
+                <div class="metric-value text-dark">{{ demands|length }}</div>
+                <div class="text-muted small mt-1">Priority community requests</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Capacity Utilization Bar -->
+    <div class="card-premium p-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-1 small">
+            <span class="fw-bold text-dark"><i data-lucide="gauge" class="me-1 text-primary" style="width: 14px; height: 14px;"></i> Live Capacity Guardrail</span>
+            <span class="text-muted">Committed: {{ committed_servings }} / {{ ngo.capacity_people }} Servings ({% if ngo.capacity_people > 0 %}{{ ((committed_servings / ngo.capacity_people) * 100)|round|int }}{% else %}0{% endif %}%)</span>
+        </div>
+        <div class="progress" style="height: 8px;">
+            {% set pct = ((committed_servings / ngo.capacity_people) * 100)|round|int if ngo.capacity_people > 0 else 0 %}
+            <div class="progress-bar {% if pct > 85 %}bg-danger{% elif pct > 60 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ pct if pct <= 100 else 100 }}%;"></div>
+        </div>
+        {% if pct >= 90 %}
+            <div class="small text-danger mt-1"><i data-lucide="alert-circle" class="me-1" style="width: 12px; height: 12px;"></i> Approaching maximum capacity. System will restrict matching to protect against spoilage.</div>
+        {% endif %}
+    </div>
+
+    <div class="row g-4" id="incomingRequests">
+        <!-- Incoming Requests Table -->
+        <div class="col-lg-8">
+            <div class="card-premium mb-4">
+                <div class="card-header-clean">
+                    <h5 class="fw-bold mb-0">Incoming Matched Donation Requests</h5>
+                    <span class="badge badge-soft badge-soft-info">{{ pending_requests|length }} New</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="small text-muted">
+                                <th>Food Item & Donor</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Match Score</th>
+                                <th>Deadline</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if pending_requests %}
+                                {% for r in pending_requests %}
+                                    {% set d = r.donation %}
+                                    <tr class="{% if d.is_emergency %}table-warning{% endif %}">
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ d.food_name }}</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">
+                                                From: {{ d.restaurant.business_name if d.restaurant else 'Verified Donor' }} &bull; ~{{ r.distance_km }} km
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-soft badge-soft-secondary text-capitalize">{{ d.category }}</span></td>
+                                        <td class="fw-semibold">{{ d.quantity }} {{ d.unit }}</td>
+                                        <td>
+                                            {% if r.match_score %}
+                                                <span class="badge badge-soft badge-soft-success fw-bold">{{ r.match_score }} / 100</span>
+                                            {% else %}
+                                                <span class="badge badge-soft badge-soft-secondary">Evaluated</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="small {% if d.is_emergency %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                            {{ d.collection_deadline.strftime('%H:%M') }}
+                                            {% if d.is_emergency %}<span class="badge bg-danger text-white ms-1">URGENT</span>{% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{{ url_for('ngo.request_detail', request_id=r.id) }}" class="btn btn-sm btn-forest py-1 px-3">
+                                                Review & Accept
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i data-lucide="inbox" class="mb-2" style="width: 32px; height: 32px; opacity: 0.4;"></i>
+                                        <div class="fw-semibold">No pending donation requests right now</div>
+                                        <div class="small">The Smart Allocation Engine will notify you as soon as matching surplus is available.</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Active In-Flight Missions -->
+            <div class="card-premium">
+                <div class="card-header-clean">
+                    <h5 class="fw-bold mb-0">Active Rescue Missions in Transit</h5>
+                    <a href="{{ url_for('missions.list_missions') }}" class="small text-primary fw-semibold text-decoration-none">View All Missions &rarr;</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="small text-muted">
+                                <th>Mission Code</th>
+                                <th>Food Item</th>
+                                <th>Courier Volunteer</th>
+                                <th>Current Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if active_missions %}
+                                {% for m in active_missions %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ url_for('missions.mission_detail', mission_id=m.id) }}" class="fw-bold text-primary font-monospace" style="font-size: 0.8rem;">
+                                                {{ m.mission_code }}
+                                            </a>
+                                        </td>
+                                        <td class="fw-semibold text-dark">{{ m.donation.food_name }} ({{ m.donation.quantity }} {{ m.donation.unit }})</td>
+                                        <td class="small">
+                                            {% if m.courier_volunteer %}
+                                                <i data-lucide="bike" class="me-1 text-primary" style="width: 14px; height: 14px;"></i> {{ m.courier_volunteer.user.full_name }}
+                                            {% else %}
+                                                <span class="text-muted">Awaiting Volunteer</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><span class="badge badge-soft badge-soft-primary text-capitalize">{{ m.status|replace('_', ' ') }}</span></td>
+                                        <td class="text-end">
+                                            <a href="{{ url_for('missions.mission_detail', mission_id=m.id) }}" class="btn btn-sm btn-outline-forest py-1 px-2" style="font-size: 0.8rem;">
+                                                Track / Verify
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted small">No active rescue missions currently in transit.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Demands & Preferences -->
+        <div class="col-lg-4">
+            <!-- Active Community Demands Card -->
+            <div class="card-premium p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="fw-bold mb-0">Active Beneficiary Demands</h6>
+                    <button class="btn btn-sm btn-outline-forest py-0 px-2" data-bs-toggle="modal" data-bs-target="#demandModal">+ Add</button>
+                </div>
+                {% if demands %}
+                    <div class="d-flex flex-column gap-2">
+                        {% for dem in demands %}
+                            <div class="p-2 rounded bg-light border d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold small text-dark text-capitalize">{{ dem.category }}</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Required: {{ dem.required_quantity }} {{ dem.unit }}</div>
+                                </div>
+                                <span class="badge {% if dem.urgency_level == 'urgent' %}bg-danger{% else %}bg-secondary{% endif %} text-white" style="font-size: 0.65rem;">
+                                    {{ dem.urgency_level|upper }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small mb-0">No active demands logged. Log required meal quantities to help the AI engine prioritize suitable donations.</p>
+                {% endif %}
+            </div>
+
+            <!-- Configuration & Preferences -->
+            <div class="card-premium p-4">
+                <h6 class="fw-bold mb-3">NGO Dietary Preferences</h6>
+                <div class="d-flex flex-wrap gap-1 mb-3">
+                    {% for p in (ngo.food_preferences or '').split(',') %}
+                        {% if p.strip() %}
+                            <span class="badge badge-soft badge-soft-success text-capitalize">{{ p.strip() }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <a href="{{ url_for('profile.index') }}" class="btn btn-outline-secondary btn-sm w-100">
+                    <i data-lucide="edit-3" class="me-1" style="width: 14px; height: 14px;"></i> Update Capacity & Preferences
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Log Community Meal Demand -->
+<div class="modal fade" id="demandModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Log Community Meal Demand</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('ngo.create_demand') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Food Category *</label>
+                        <select name="category" class="form-select">
+                            <option value="cooked meals" selected>Cooked Meals</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="baked goods">Baked Goods</option>
+                            <option value="fruits">Fruits & Raw Produce</option>
+                            <option value="dairy">Dairy</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Required Quantity (Servings / Meals) *</label>
+                        <input type="number" name="required_quantity" class="form-control" value="60" min="5" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Urgency Level</label>
+                        <select name="urgency_level" class="form-select">
+                            <option value="normal" selected>Normal</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="critical">Critical (Shelter Shortage)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Notes / Beneficiary Requirements</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="e.g. For evening senior citizen community dinner"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-forest btn-sm">Save Demand Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

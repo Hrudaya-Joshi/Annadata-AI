@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Platform Audit Trail — ANNADATA AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Security & Operational Audit Trail</h3>
+            <p class="text-muted small mb-0">Immutable system audit logs tracking logins, mission updates, allocations, and administrative interventions</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-forest btn-sm">
+            &larr; Admin Center
+        </a>
+    </div>
+
+    <div class="card-premium">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+                <thead class="table-light">
+                    <tr class="text-muted">
+                        <th>Timestamp (UTC)</th>
+                        <th>User Actor</th>
+                        <th>Action Performed</th>
+                        <th>Target Resource</th>
+                        <th>Details & Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if logs %}
+                        {% for a in logs %}
+                            <tr>
+                                <td class="text-muted font-monospace">{{ a.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td class="fw-bold text-dark">
+                                    {% if a.actor %}
+                                        {{ a.actor.full_name }} ({{ a.actor.role }})
+                                    {% else %}
+                                        <span class="text-muted">System Agent</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge badge-soft badge-soft-dark font-monospace">{{ a.action }}</span></td>
+                                <td>{{ a.target_type }} {% if a.target_id %}#{{ a.target_id }}{% endif %}</td>
+                                <td class="text-muted">{{ a.details or '-' }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">No audit events logged yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

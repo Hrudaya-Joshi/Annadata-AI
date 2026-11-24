@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}NGO Donation Requests Archive — ANNADATA AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Incoming Requests & Rescue History</h3>
+            <p class="text-muted small mb-0">Record of all matched food donations evaluated by {{ ngo.organization_name }}</p>
+        </div>
+        <a href="{{ url_for('ngo.dashboard') }}" class="btn btn-outline-forest btn-sm">
+            NGO Dashboard
+        </a>
+    </div>
+
+    <div class="card-premium">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr class="small text-muted">
+                        <th>Date</th>
+                        <th>Food Item</th>
+                        <th>Donor Restaurant</th>
+                        <th>Quantity</th>
+                        <th>Match Score</th>
+                        <th>Request Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if requests %}
+                        {% for r in requests %}
+                            {% set d = r.donation %}
+                            <tr>
+                                <td class="small text-muted">{{ r.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td class="fw-bold text-dark">{{ d.food_name }}</td>
+                                <td class="small">{{ d.restaurant.business_name if d.restaurant else 'Verified Kitchen' }}</td>
+                                <td>{{ d.quantity }} {{ d.unit }}</td>
+                                <td>
+                                    {% if r.match_score %}
+                                        <span class="badge badge-soft badge-soft-success fw-bold">{{ r.match_score }}/100</span>
+                                    {% else %}
+                                        <span class="badge badge-soft badge-soft-secondary">Matched</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if r.status == 'accepted' %}
+                                        <span class="badge badge-soft badge-soft-success">Accepted</span>
+                                    {% elif r.status == 'rejected' %}
+                                        <span class="badge badge-soft badge-soft-danger">Declined</span>
+                                    {% else %}
+                                        <span class="badge badge-soft badge-soft-warning text-dark">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('ngo.request_detail', request_id=r.id) }}" class="btn btn-sm btn-outline-forest py-1 px-2" style="font-size: 0.8rem;">
+                                        View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">No donation requests recorded yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

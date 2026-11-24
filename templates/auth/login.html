@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Sign In — ANNADATA AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card-premium p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: var(--primary); display: inline-flex; align-items: center; justify-content: center; color: var(--accent); margin-bottom: 0.75rem;">
+                        <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">Welcome Back</h3>
+                    <p class="text-muted small">Sign in to your ANNADATA AI portal</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Email Address</label>
+                        <input type="email" name="email" id="loginEmail" class="form-control" placeholder="name@organization.org" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-semibold mb-0">Password</label>
+                        </div>
+                        <input type="password" name="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-forest py-2">Sign In</button>
+                    </div>
+                </form>
+
+                <!-- One-Click Demo Credentials for Academic Evaluation -->
+                <div class="p-3 bg-light rounded border mt-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-bold text-dark"><i data-lucide="key" class="me-1 text-primary" style="width: 14px; height: 14px;"></i> Demo Evaluation Accounts</span>
+                        <span class="badge badge-soft badge-soft-info" style="font-size: 0.65rem;">One-Click Fill</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="fillLogin('restaurant@example.com', 'password123')">Restaurant</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="fillLogin('ngo@example.com', 'password123')">NGO</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="fillLogin('volunteer@example.com', 'password123')">Volunteer</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="fillLogin('admin@example.com', 'admin123')">Admin</button>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 small text-muted">
+                    Don't have an account yet? <a href="{{ url_for('auth.register') }}" class="text-primary fw-semibold">Register here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function fillLogin(email, password) {
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = password;
+}
+</script>
+{% endblock %}

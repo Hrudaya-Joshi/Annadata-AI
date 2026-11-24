@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Food Rescue Passport — {{ donation.rescue_code or ('#' ~ donation.id) }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <!-- Header Back link -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge badge-soft badge-soft-success px-3 py-1">
+                    <i data-lucide="shield-check" class="me-1" style="width: 14px; height: 14px;"></i> Public Traceability Verification
+                </span>
+                <button class="btn btn-sm btn-outline-forest d-print-none" onclick="window.print()">
+                    <i data-lucide="printer" class="me-1" style="width: 14px; height: 14px;"></i> Print Passport
+                </button>
+            </div>
+
+            <!-- The Food Rescue Passport Certificate Card -->
+            <div class="card-premium p-4 p-md-5 shadow-lg border-2 border-forest position-relative overflow-hidden" style="background: #FFFFFF;">
+                <!-- Watermark Background Logo -->
+                <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.03; pointer-events: none;">
+                    <i data-lucide="shield-check" style="width: 260px; height: 260px;"></i>
+                </div>
+
+                <!-- Top Header -->
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center pb-4 mb-4 border-bottom gap-3">
+                    <div>
+                        <div class="text-uppercase fw-extrabold text-primary mb-1" style="font-size: 0.75rem; letter-spacing: 0.08em;">
+                            ANNADATA AI NETWORK &bull; RESCUE PASSPORT
+                        </div>
+                        <h3 class="fw-black mb-0 text-dark font-monospace">{{ donation.rescue_code or ('ANN-RESCUE-' ~ donation.id) }}</h3>
+                    </div>
+                    <div class="text-sm-end">
+                        <span class="badge bg-success text-white px-3 py-2" style="font-size: 0.8rem;">
+                            <i data-lucide="check" class="me-1" style="width: 14px; height: 14px;"></i> SAFETY VERIFIED
+                        </span>
+                        <div class="text-muted small mt-1" style="font-size: 0.75rem;">Issued: {{ donation.created_at.strftime('%Y-%m-%d %H:%M UTC') }}</div>
+                    </div>
+                </div>
+
+                <!-- Center Section: QR Code and Key Attributes -->
+                <div class="row g-4 align-items-center mb-4">
+                    <div class="col-sm-5 text-center">
+                        <div class="p-3 bg-white rounded border d-inline-block shadow-sm">
+                            <img src="{{ qr_data_uri }}" alt="Passport QR Code" style="width: 180px; height: 180px;" class="img-fluid">
+                        </div>
+                        <div class="small text-muted mt-2" style="font-size: 0.75rem;">
+                            Scan to verify authentic digital record
+                        </div>
+                    </div>
+
+                    <div class="col-sm-7">
+                        <div class="d-flex flex-column gap-2">
+                            <div>
+                                <span class="text-muted small text-uppercase" style="font-size: 0.7rem; font-weight: 600;">Food Item & Batch</span>
+                                <h4 class="fw-bold text-dark mb-0">{{ donation.food_name }}</h4>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <div>
+                                    <span class="text-muted small" style="font-size: 0.7rem;">Category:</span>
+                                    <div class="fw-semibold text-capitalize text-dark">{{ donation.category }}</div>
+                                </div>
+                                <div>
+                                    <span class="text-muted small" style="font-size: 0.7rem;">Quantity:</span>
+                                    <div class="fw-bold text-success">{{ donation.quantity }} {{ donation.unit }}</div>
+                                </div>
+                                <div>
+                                    <span class="text-muted small" style="font-size: 0.7rem;">Temp:</span>
+                                    <div class="fw-semibold text-dark">{{ donation.storage_temperature or 'Controlled' }}</div>
+                                </div>
+                            </div>
+                            <div class="pt-2 border-top">
+                                <span class="text-muted small" style="font-size: 0.7rem;">Verified Food Donor:</span>
+                                <div class="fw-semibold text-dark">{{ masked_name }}</div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">Location: {{ public_address }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chronology & Deadlines -->
+                <div class="p-3 bg-light rounded border mb-4">
+                    <div class="row g-2 small">
+                        <div class="col-4">
+                            <div class="text-muted" style="font-size: 0.7rem;">PREPARATION TIME</div>
+                            <div class="fw-semibold text-dark">{{ donation.preparation_time.strftime('%d %b, %H:%M') }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-muted" style="font-size: 0.7rem;">COLLECTION DEADLINE</div>
+                            <div class="fw-bold text-danger">{{ donation.collection_deadline.strftime('%d %b, %H:%M') }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-muted" style="font-size: 0.7rem;">EXPIRY TIME</div>
+                            <div class="fw-semibold text-dark">{{ donation.expiry_time.strftime('%d %b, %H:%M') }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Food Safety Screening Protocol -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-2 d-flex align-items-center gap-2">
+                        <i data-lucide="shield" class="text-primary" style="width: 16px; height: 16px;"></i>
+                        Food Safety Inspection Checklist
+                    </h6>
+                    <div class="row g-2 small">
+                        <div class="col-md-6 d-flex align-items-center gap-2">
+                            <i data-lucide="check-circle" class="text-success" style="width: 16px; height: 16px;"></i>
+                            <span>Visual & Organoleptic Inspection Passed</span>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center gap-2">
+                            <i data-lucide="check-circle" class="text-success" style="width: 16px; height: 16px;"></i>
+                            <span>Sanitized, Leak-Proof Food Packaging</span>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center gap-2">
+                            <i data-lucide="check-circle" class="text-success" style="width: 16px; height: 16px;"></i>
+                            <span>Thermal Holding Compliance Verified</span>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center gap-2">
+                            <i data-lucide="check-circle" class="text-success" style="width: 16px; height: 16px;"></i>
+                            <span>Allergen Declaration Protocol Completed</span>
+                        </div>
+                    </div>
+                    {% if safety and safety.ai_risk_observations %}
+                        <div class="mt-2 p-2 rounded bg-light small text-muted" style="font-size: 0.75rem;">
+                            <strong>Screening Observations:</strong> {{ safety.ai_risk_observations }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Lifecycle State Progress -->
+                <div class="pt-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center small mb-2">
+                        <span class="fw-bold text-dark">Donation Lifecycle Status:</span>
+                        <span class="badge bg-primary text-white text-capitalize">{{ donation.status|replace('_', ' ') }}</span>
+                    </div>
+
+                    {% if mission %}
+                        <div class="p-3 bg-light rounded border small">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-semibold">Mission Code:</span>
+                                <span class="font-monospace text-primary fw-bold">{{ mission.mission_code }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <span class="fw-semibold">Destination Shelter:</span>
+                                <span>{{ mission.destination_ngo.organization_name }}</span>
+                            </div>
+                            {% if mission.delivery_time %}
+                                <div class="d-flex justify-content-between mt-1 text-success fw-bold">
+                                    <span>Verified Delivery Timestamp:</span>
+                                    <span>{{ mission.delivery_time.strftime('%Y-%m-%d %H:%M UTC') }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Public Protection Notice -->
+                <div class="mt-4 pt-3 border-top text-center text-muted" style="font-size: 0.7rem;">
+                    ANNADATA AI Public Safety Protection &bull; Private volunteer contacts and internal beneficiary demographics are shielded.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

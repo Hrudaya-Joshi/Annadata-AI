@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Account Settings — ANNADATA AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <h3 class="fw-bold mb-1">Account & Organization Settings</h3>
+                <p class="text-muted small mb-0">Manage your profile credentials, capacity thresholds, and dietary preferences</p>
+            </div>
+
+            <div class="card-premium p-4 p-md-5 mb-4">
+                <form method="POST" action="{{ url_for('profile.index') }}">
+                    <div class="d-flex align-items-center gap-3 pb-4 mb-4 border-bottom">
+                        <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem;">
+                            {{ current_user.full_name[:1].upper() }}
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-dark mb-0">{{ current_user.full_name }}</h4>
+                            <div class="text-muted small">{{ current_user.email }} &bull; <span class="badge badge-soft badge-soft-success text-capitalize">{{ current_user.role }}</span></div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold text-primary mb-3">Primary Contact Information</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Full Name</label>
+                            <input type="text" name="full_name" class="form-control" value="{{ current_user.full_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Phone Number</label>
+                            <input type="tel" name="phone" class="form-control" value="{{ current_user.phone or '' }}">
+                        </div>
+                    </div>
+
+                    <!-- Role-Specific Profile Sections -->
+                    {% if current_user.role == 'restaurant' and current_user.restaurant %}
+                        <h5 class="fw-bold text-primary mb-3 border-top pt-4">Restaurant & Kitchen Profile</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Business Name</label>
+                                <input type="text" name="business_name" class="form-control" value="{{ current_user.restaurant.business_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Food / Cuisine Type</label>
+                                <input type="text" name="food_type" class="form-control" value="{{ current_user.restaurant.food_type or '' }}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Location / Address</label>
+                                <input type="text" name="location_address" class="form-control" value="{{ current_user.restaurant.location_address }}">
+                            </div>
+                        </div>
+                    {% elif current_user.role == 'ngo' and current_user.ngo %}
+                        <h5 class="fw-bold text-primary mb-3 border-top pt-4">NGO & Shelter Configuration</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Organization Name</label>
+                                <input type="text" name="organization_name" class="form-control" value="{{ current_user.ngo.organization_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Beneficiary Capacity (People / Servings)</label>
+                                <input type="number" name="capacity_people" class="form-control" value="{{ current_user.ngo.capacity_people }}">
+                                <div class="form-text" style="font-size: 0.75rem;">Protects your shelter against receiving surplus beyond your physical handling capacity.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Food Preferences (comma-separated)</label>
+                                <input type="text" name="food_preferences" class="form-control" value="{{ current_user.ngo.food_preferences or '' }}">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Physical Facility Address</label>
+                                <input type="text" name="location_address" class="form-control" value="{{ current_user.ngo.location_address }}">
+                            </div>
+                        </div>
+                    {% elif current_user.role == 'volunteer' and current_user.volunteer %}
+                        <h5 class="fw-bold text-primary mb-3 border-top pt-4">Volunteer Dispatch Parameters</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Vehicle Type</label>
+                                <select name="vehicle_type" class="form-select">
+                                    <option value="bike" {% if current_user.volunteer.vehicle_type == 'bike' %}selected{% endif %}>Motorcycle / Scooter</option>
+                                    <option value="bicycle" {% if current_user.volunteer.vehicle_type == 'bicycle' %}selected{% endif %}>Bicycle</option>
+                                    <option value="car" {% if current_user.volunteer.vehicle_type == 'car' %}selected{% endif %}>Car / Van</option>
+                                    <option value="walk" {% if current_user.volunteer.vehicle_type == 'walk' %}selected{% endif %}>Pedestrian</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Operating Radius (km)</label>
+                                <input type="number" step="0.5" name="max_distance_km" class="form-control" value="{{ current_user.volunteer.max_distance_km }}">
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-forest px-4 py-2">Save Profile Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,453 @@
+/* ==========================================================================
+   ANNADATA AI — Intelligent Food Rescue & Community Impact Network
+   Design System: Linear / Stripe / Modern Social Impact Platform
+   ========================================================================== */
+
+:root {
+  --primary: #123D32;         /* Deep Forest Green */
+  --primary-light: #1A5445;
+  --primary-dark: #0B2620;
+  --secondary: #18A875;       /* Emerald Accent */
+  --secondary-light: #E8F7F1;
+  --accent: #F4B942;          /* Warm Amber */
+  --accent-light: #FEF7E6;
+  --bg-main: #F8FAF6;         /* Soft Ivory */
+  --surface: #FFFFFF;
+  --surface-alt: #F1F5F0;
+  --text-main: #18231F;       /* Dark Charcoal */
+  --text-muted: #5A6D65;
+  --text-light: #8E9F97;
+  --border-color: #E2E8F0;
+  --border-focus: #18A875;
+  --shadow-sm: 0 1px 2px rgba(18, 61, 50, 0.05);
+  --shadow-md: 0 4px 12px rgba(18, 61, 50, 0.08);
+  --shadow-lg: 0 10px 25px rgba(18, 61, 50, 0.12);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ------------------- Typography ------------------- */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--primary-dark);
+  letter-spacing: -0.02em;
+}
+
+p, span, li, td {
+  letter-spacing: -0.01em;
+}
+
+/* ------------------- Navbar ------------------- */
+.navbar-annadata {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  transition: all 0.2s ease;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.brand-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background-color: var(--secondary-light);
+  color: var(--secondary);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.nav-link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted) !important;
+  padding: 0.5rem 0.85rem !important;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--primary) !important;
+  background-color: var(--surface-alt);
+}
+
+/* ------------------- Cards & Surfaces ------------------- */
+.card-premium {
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-premium:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-header-clean {
+  background: transparent;
+  border-bottom: 1px solid var(--border-color);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--secondary);
+}
+
+.metric-card.accent::after {
+  background: var(--accent);
+}
+
+.metric-card.primary::after {
+  background: var(--primary);
+}
+
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  line-height: 1.2;
+}
+
+.metric-label {
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ------------------- Buttons ------------------- */
+.btn-forest {
+  background-color: var(--primary);
+  color: #FFFFFF;
+  border: 1px solid var(--primary);
+  font-weight: 600;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.btn-forest:hover {
+  background-color: var(--primary-light);
+  color: #FFFFFF;
+  box-shadow: 0 4px 10px rgba(18, 61, 50, 0.2);
+}
+
+.btn-emerald {
+  background-color: var(--secondary);
+  color: #FFFFFF;
+  border: 1px solid var(--secondary);
+  font-weight: 600;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.btn-emerald:hover {
+  background-color: #13885e;
+  color: #FFFFFF;
+}
+
+.btn-outline-forest {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border-color);
+  font-weight: 600;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.btn-outline-forest:hover {
+  background-color: var(--surface-alt);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ------------------- Badges ------------------- */
+.badge-soft {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.badge-soft-success {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.badge-soft-warning {
+  background-color: #FEF3C7;
+  color: #92400E;
+}
+
+.badge-soft-danger {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.badge-soft-info {
+  background-color: #E0F2FE;
+  color: #075985;
+}
+
+.badge-soft-secondary {
+  background-color: #F1F5F9;
+  color: #475569;
+}
+
+/* ------------------- Wizard Stepper ------------------- */
+.wizard-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.wizard-steps::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--border-color);
+  z-index: 1;
+  transform: translateY(-50%);
+}
+
+.wizard-step {
+  position: relative;
+  z-index: 2;
+  background: var(--surface);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.wizard-step.active {
+  border-color: var(--secondary);
+  background-color: var(--secondary);
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px var(--secondary-light);
+}
+
+.wizard-step.completed {
+  border-color: var(--primary);
+  background-color: var(--primary);
+  color: #FFFFFF;
+}
+
+/* ------------------- Mission Timeline ------------------- */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+  margin: 1.5rem 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8px;
+  width: 2px;
+  background-color: var(--border-color);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-point {
+  position: absolute;
+  left: -2rem;
+  top: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: var(--surface);
+  border: 3px solid var(--secondary);
+}
+
+.timeline-point.pending {
+  border-color: var(--border-color);
+  background-color: var(--surface-alt);
+}
+
+/* ------------------- Floating AI Assistant ------------------- */
+.assistant-trigger {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(18, 61, 50, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1040;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.assistant-trigger:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 28px rgba(18, 61, 50, 0.35);
+}
+
+.assistant-panel {
+  position: fixed;
+  bottom: 88px;
+  right: 24px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 540px;
+  max-height: calc(100vh - 120px);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  z-index: 1040;
+  display: none;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.assistant-header {
+  background: var(--primary);
+  color: #FFFFFF;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.assistant-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: var(--bg-main);
+}
+
+.chat-bubble {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  max-width: 85%;
+}
+
+.chat-bubble.assistant {
+  background-color: var(--surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+.chat-bubble.user {
+  background-color: var(--primary);
+  color: #FFFFFF;
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}
+
+.assistant-input-area {
+  padding: 0.75rem;
+  background: var(--surface);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ------------------- Footer ------------------- */
+.footer-annadata {
+  background-color: var(--primary-dark);
+  color: #A0B0A8;
+  padding: 3rem 0 2rem;
+  margin-top: auto;
+  font-size: 0.875rem;
+}
+
+.footer-annadata a {
+  color: #A0B0A8;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footer-annadata a:hover {
+  color: #FFFFFF;
+}

@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Interactive Food Rescue Map — ANNADATA AI{% endblock %}
+
+{% block head_extra %}
+<style>
+#rescueMap {
+    height: 620px;
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    z-index: 1;
+}
+
+.map-control-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.custom-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    border: 2px solid white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge badge-soft badge-soft-success">Live Spatial Intelligence</span>
+                <span class="text-muted small">&bull; OpenStreetMap Cartography</span>
+            </div>
+            <h2 class="fw-bold mb-0">Food Rescue Geospatial Network</h2>
+            <div class="text-muted small">Real-time visualization of surplus kitchens, certified shelters, and active courier transit paths</div>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="btn-group btn-group-sm" id="mapFilters">
+            <button type="button" class="btn btn-forest active" data-filter="all">All Layers</button>
+            <button type="button" class="btn btn-outline-forest" data-filter="donations">Active Surplus</button>
+            <button type="button" class="btn btn-outline-forest" data-filter="ngos">Certified NGOs</button>
+            <button type="button" class="btn btn-outline-forest" data-filter="volunteers">Volunteer Couriers</button>
+            <button type="button" class="btn btn-outline-forest" data-filter="transit">Transit Routes</button>
+        </div>
+    </div>
+
+    <!-- Map Container with floating legend -->
+    <div class="position-relative mb-4">
+        <div id="rescueMap"></div>
+
+        <!-- Floating Legend -->
+        <div class="position-absolute bottom-0 start-0 m-3 map-control-panel small d-none d-md-block" style="z-index: 1000; max-width: 260px;">
+            <div class="fw-bold text-dark mb-2">Map Legend</div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: #123D32; display: inline-block;"></span>
+                <span>Active Food Surplus Batch</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: #EF4444; display: inline-block;"></span>
+                <span>Emergency Surplus (&lt;2h left)</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: #18A875; display: inline-block;"></span>
+                <span>Certified NGO Shelter</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: #3B82F6; display: inline-block;"></span>
+                <span>Available Rescue Courier</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span style="width: 20px; height: 2px; background: #D97706; display: inline-block; border-top: 2px dashed #D97706;"></span>
+                <span>Active Transit Route</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // Default coordinates: Bengaluru Center [12.9716, 77.5946]
+    const map = L.map('rescueMap').setView([12.9716, 77.5946], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    const layerDonations = L.layerGroup().addTo(map);
+    const layerNgos = L.layerGroup().addTo(map);
+    const layerVolunteers = L.layerGroup().addTo(map);
+    const layerTransit = L.layerGroup().addTo(map);
+
+    try {
+        const resp = await fetch('/api/map/data');
+        const data = await resp.json();
+
+        // 1. Add Food Donations
+        (data.donations || []).forEach(d => {
+            const isEmergency = d.is_emergency;
+            const markerColor = isEmergency ? '#EF4444' : '#123D32';
+            const iconHtml = `<div class="custom-marker" style="background: ${markerColor}; width: 28px; height: 28px; font-size: 14px;">🍲</div>`;
+            const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [28, 28] });
+
+            const popupContent = `
+                <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem;">
+                    <div style="font-weight: 700; color: #123D32; font-size: 0.95rem;">${d.name}</div>
+                    <div style="color: #64748B; font-size: 0.75rem; margin-bottom: 4px;">${d.quantity} &bull; ${d.category}</div>
+                    ${isEmergency ? '<span style="background: #FEE2E2; color: #991B1B; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.7rem;">EMERGENCY RESCUE</span>' : ''}
+                    <div style="margin-top: 6px; color: #334155;"><strong>Sector:</strong> ${d.address}</div>
+                    <div style="color: #334155;"><strong>Deadline:</strong> ${d.deadline || 'ASAP'}</div>
+                    <div style="margin-top: 8px;">
+                        <a href="${d.passport_url}" style="background: #18A875; color: white; padding: 3px 8px; border-radius: 4px; text-decoration: none; font-size: 0.75rem; font-weight: 600;">View Passport</a>
+                    </div>
+                </div>
+            `;
+
+            L.marker([d.lat, d.lng], { icon: customIcon }).bindPopup(popupContent).addTo(layerDonations);
+        });
+
+        // 2. Add Certified NGOs
+        (data.ngos || []).forEach(n => {
+            const iconHtml = `<div class="custom-marker" style="background: #18A875; width: 28px; height: 28px; font-size: 14px;">❤️</div>`;
+            const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [28, 28] });
+
+            const popupContent = `
+                <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem;">
+                    <div style="font-weight: 700; color: #123D32; font-size: 0.95rem;">${n.name}</div>
+                    <div style="color: #64748B; font-size: 0.75rem; margin-bottom: 4px;">Certified Relief Shelter</div>
+                    <div><strong>Capacity:</strong> ${n.capacity} servings</div>
+                    <div style="margin-top: 4px;"><strong>Sector:</strong> ${n.address}</div>
+                </div>
+            `;
+
+            L.marker([n.lat, n.lng], { icon: customIcon }).bindPopup(popupContent).addTo(layerNgos);
+        });
+
+        // 3. Add Volunteers
+        (data.volunteers || []).forEach(v => {
+            const iconHtml = `<div class="custom-marker" style="background: #3B82F6; width: 26px; height: 26px; font-size: 12px;">🚲</div>`;
+            const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [26, 26] });
+
+            const popupContent = `
+                <div style="font-family: 'Inter', sans-serif; font-size: 0.85rem;">
+                    <div style="font-weight: 700; color: #1E3A8A;">${v.name}</div>
+                    <span style="background: #D1FAE5; color: #065F46; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">Available on Call</span>
+                </div>
+            `;
+
+            L.marker([v.lat, v.lng], { icon: customIcon }).bindPopup(popupContent).addTo(layerVolunteers);
+        });
+
+        // 4. Add Active Transit Routes
+        (data.transit_routes || []).forEach(r => {
+            const latlngs = [[r.from_lat, r.from_lng], [r.to_lat, r.to_lng]];
+            const polyline = L.polyline(latlngs, {
+                color: '#D97706',
+                weight: 3,
+                dashArray: '6, 6',
+                opacity: 0.8
+            }).addTo(layerTransit);
+
+            polyline.bindPopup(`
+                <div style="font-family: 'Inter', sans-serif; font-size: 0.8rem;">
+                    <strong>Active Transit:</strong> ${r.food}<br>
+                    <strong>Mission:</strong> ${r.mission_code}<br>
+                    <strong>Status:</strong> ${r.status}
+                </div>
+            `);
+        });
+
+    } catch (e) {
+        console.error("Map layer data load error:", e);
+    }
+
+    // Filter controls
+    document.querySelectorAll('#mapFilters button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#mapFilters button').forEach(b => {
+                b.classList.remove('btn-forest', 'active');
+                b.classList.add('btn-outline-forest');
+            });
+            btn.classList.add('btn-forest', 'active');
+            btn.classList.remove('btn-outline-forest');
+
+            const f = btn.getAttribute('data-filter');
+            if (f === 'all') {
+                map.addLayer(layerDonations);
+                map.addLayer(layerNgos);
+                map.addLayer(layerVolunteers);
+                map.addLayer(layerTransit);
+            } else if (f === 'donations') {
+                map.addLayer(layerDonations);
+                map.removeLayer(layerNgos);
+                map.removeLayer(layerVolunteers);
+                map.removeLayer(layerTransit);
+            } else if (f === 'ngos') {
+                map.removeLayer(layerDonations);
+                map.addLayer(layerNgos);
+                map.removeLayer(layerVolunteers);
+                map.removeLayer(layerTransit);
+            } else if (f === 'volunteers') {
+                map.removeLayer(layerDonations);
+                map.removeLayer(layerNgos);
+                map.addLayer(layerVolunteers);
+                map.removeLayer(layerTransit);
+            } else if (f === 'transit') {
+                map.removeLayer(layerDonations);
+                map.removeLayer(layerNgos);
+                map.removeLayer(layerVolunteers);
+                map.addLayer(layerTransit);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

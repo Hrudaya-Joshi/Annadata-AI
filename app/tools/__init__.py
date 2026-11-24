@@ -1,0 +1,1 @@
+# Tool functions used by agents for DB queries, geocoding, and safety rules.

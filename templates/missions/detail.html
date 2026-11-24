@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Mission {{ mission.mission_code }} — ANNADATA AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Top Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary text-white font-monospace">{{ mission.mission_code }}</span>
+                <span class="badge badge-soft badge-soft-success text-capitalize">{{ mission.status|replace('_', ' ') }}</span>
+            </div>
+            <h3 class="fw-bold mb-0 text-dark">Food Rescue Mission Lifecourse</h3>
+            <div class="text-muted small">Initiated {{ mission.created_at.strftime('%d %b %Y, %H:%M') }}</div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('passport.view_passport', rescue_code=mission.donation.rescue_code or mission.donation.id) }}" class="btn btn-outline-forest btn-sm" target="_blank">
+                <i data-lucide="qr-code" class="me-1" style="width: 14px; height: 14px;"></i> Rescue Passport
+            </a>
+            <a href="{{ url_for('missions.list_missions') }}" class="btn btn-light border btn-sm">
+                All Missions
+            </a>
+        </div>
+    </div>
+
+    <!-- Delay Alert if past deadline -->
+    {% if mission.status in ['volunteer_assigned', 'pickup_initiated', 'food_collected', 'delivery_initiated'] and mission.pickup_deadline and mission.pickup_deadline < now %}
+        <div class="alert alert-danger border shadow-sm mb-4 d-flex align-items-center gap-3">
+            <i data-lucide="alert-triangle" class="text-danger" style="width: 24px; height: 24px;"></i>
+            <div>
+                <div class="fw-bold">Mission Delayed Alert</div>
+                <div class="small">The scheduled pickup deadline ({{ mission.pickup_deadline.strftime('%H:%M') }}) has elapsed. Priority courier escalation active.</div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <!-- 10-Stage Lifecycle Progress Bar -->
+            <div class="card-premium p-4 mb-4">
+                <h5 class="fw-bold text-primary mb-3">Mission Lifecycle Stages</h5>
+                
+                {% set stages = [
+                    ('submitted', 'Donation Logged'),
+                    ('safety_screening', 'Safety Screened'),
+                    ('ngo_matching', 'NGO Matched'),
+                    ('ngo_accepted', 'NGO Accepted'),
+                    ('volunteer_assigned', 'Courier Assigned'),
+                    ('pickup_initiated', 'Pickup En Route'),
+                    ('food_collected', 'Food Rescued'),
+                    ('delivery_initiated', 'In Transit'),
+                    ('delivery_confirmed', 'Verified Delivery'),
+                    ('completed', 'Completed')
+                ] %}
+
+                <div class="timeline">
+                    {% set current_found = false %}
+                    {% for st_key, st_label in stages %}
+                        <div class="timeline-item">
+                            <div class="timeline-point {% if mission.status == st_key %}bg-success border-success{% elif current_found %}pending{% endif %}"></div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold {% if mission.status == st_key %}text-success{% elif current_found %}text-muted{% else %}text-dark{% endif %}">
+                                        {{ st_label }}
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        {% if st_key == 'food_collected' and mission.pickup_time %}
+                                            Collected at {{ mission.pickup_time.strftime('%H:%M') }}
+                                        {% elif st_key == 'delivery_confirmed' and mission.delivery_time %}
+                                            Delivered at {{ mission.delivery_time.strftime('%H:%M') }}
+                                        {% elif mission.status == st_key %}
+                                            <span class="badge badge-soft badge-soft-warning">Current Stage</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if mission.status == st_key %}
+                            {% set current_found = true %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Handover & PIN Verification Form -->
+            {% if mission.status in ['food_collected', 'delivery_initiated'] %}
+                <div class="card-premium p-4 border-2 border-emerald mb-4">
+                    <h5 class="fw-bold text-dark mb-2">Delivery Handover & Verification</h5>
+                    <p class="text-muted small mb-3">
+                        To guarantee food arrives safely at the destination shelter, the NGO must verify delivery with the 6-digit confirmation PIN.
+                    </p>
+
+                    <div class="p-3 bg-light rounded border mb-3 text-center">
+                        <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.7rem;">Mission Handover PIN</div>
+                        <div class="display-6 fw-bold font-monospace text-primary tracking-wide">
+                            {{ mission.verification_pin or '748291' }}
+                        </div>
+                        <div class="small text-muted mt-1" style="font-size: 0.75rem;">
+                            Volunteer displays this PIN to the receiving NGO coordinator upon handover.
+                        </div>
+                    </div>
+
+                    {% if current_user.role in ['ngo', 'admin'] %}
+                        <form method="POST" action="{{ url_for('missions.verify_delivery_pin', mission_id=mission.id) }}">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Enter Courier PIN to Confirm Receipt *</label>
+                                <input type="text" name="pin" class="form-control form-control-lg font-monospace text-center" placeholder="6-digit PIN" required style="max-width: 240px; margin: 0 auto;">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Receiving Notes / Temperature at Delivery</label>
+                                <input type="text" name="notes" class="form-control form-control-sm" placeholder="e.g. Received in hot insulated bags, visual check passed">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-emerald py-2 fw-bold">
+                                    <i data-lucide="check-circle" class="me-1" style="width: 16px; height: 16px;"></i> Verify Handover & Confirm Impact
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <!-- Interactive State Transitions (Authorized Roles) -->
+            {% if allowed_next_states %}
+                <div class="card-premium p-4 mb-4">
+                    <h6 class="fw-bold text-dark mb-3">Authorized Mission State Transitions</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for st in allowed_next_states %}
+                            {% if st != 'cancelled' %}
+                                <form method="POST" action="{{ url_for('missions.transition_mission', mission_id=mission.id) }}" class="d-inline">
+                                    <input type="hidden" name="new_status" value="{{ st }}">
+                                    <button type="submit" class="btn btn-forest btn-sm text-capitalize">
+                                        Advance to: {{ st|replace('_', ' ') }}
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if 'cancelled' in allowed_next_states %}
+                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                                Cancel Mission
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar: Logistics, Donor, and Shelter Details -->
+        <div class="col-lg-4">
+            <!-- Food Item Card -->
+            <div class="card-premium p-4 mb-4">
+                <span class="badge badge-soft badge-soft-secondary text-capitalize mb-2">{{ mission.donation.category }}</span>
+                <h5 class="fw-bold text-dark mb-1">{{ mission.donation.food_name }}</h5>
+                <div class="fw-semibold text-success mb-3">{{ mission.donation.quantity }} {{ mission.donation.unit }}</div>
+
+                <div class="small border-top pt-2 d-flex flex-column gap-2 text-muted">
+                    <div>
+                        <strong>Donor Restaurant:</strong>
+                        <div>{{ mission.donation.restaurant.business_name if mission.donation.restaurant else 'Verified Donor' }}</div>
+                        <div style="font-size: 0.75rem;">{{ mission.donation.location_address }}</div>
+                    </div>
+                    <div class="pt-2 border-top">
+                        <strong>Receiving Shelter:</strong>
+                        <div>{{ mission.destination_ngo.organization_name }}</div>
+                        <div style="font-size: 0.75rem;">{{ mission.destination_ngo.location_address }}</div>
+                    </div>
+                    <div class="pt-2 border-top">
+                        <strong>Assigned Courier:</strong>
+                        <div>{{ mission.courier_volunteer.user.full_name if mission.courier_volunteer else 'Unassigned' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reassign Volunteer (Admins / NGOs) -->
+            {% if current_user.role in ['admin', 'ngo'] and available_volunteers and mission.status not in ['completed', 'cancelled'] %}
+                <div class="card-premium p-4">
+                    <h6 class="fw-bold mb-2">Reassign Volunteer Courier</h6>
+                    <form method="POST" action="{{ url_for('missions.assign_volunteer', mission_id=mission.id) }}">
+                        <div class="mb-3">
+                            <select name="volunteer_id" class="form-select form-select-sm">
+                                {% for v in available_volunteers %}
+                                    <option value="{{ v.id }}">{{ v.user.full_name }} ({{ v.vehicle_type }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-outline-forest btn-sm w-100">Reassign Courier</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Cancel Mission -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Cancel Rescue Mission</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('missions.transition_mission', mission_id=mission.id) }}">
+                <input type="hidden" name="new_status" value="cancelled">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Cancellation Reason *</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="e.g. Donor kitchen closed unexpectedly, food spoiled before courier arrival" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger btn-sm">Confirm Cancellation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
